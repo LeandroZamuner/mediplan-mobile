@@ -37,7 +37,15 @@
           "color": "#3646AB"
         }
       ],
-      "expo-status-bar"
+      [
+        "expo-splash-screen",
+        {
+          "image": "./assets/images/splash-logo.png",
+          "backgroundColor": "#18204D",
+          "imageWidth": 200,
+          "resizeMode": "contain"
+        }
+      ]
     ],
     "scheme": "mediplan"
   }

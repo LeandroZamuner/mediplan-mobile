@@ -1,26 +1,29 @@
 import { Stack, router } from "expo-router";
+import * as SplashScreen from "expo-splash-screen";
 import { StatusBar } from "expo-status-bar";
 import { AuthProvider, useAuth } from "@/auth/AuthProvider";
 import { GradientScreen } from "@/ui/GradientScreen";
 import { Button } from "@/ui/Button";
 import { useEffect } from "react";
-import { ActivityIndicator, Text } from "react-native";
+import { Text } from "react-native";
 import * as Notifications from "expo-notifications";
 import { recordTaken } from "@/lib/doses";
 import { handleDoseAction } from "@/notifications/respond";
 import { DOSE_CATEGORY, DOSE_CHANNEL } from "@/notifications/sync";
 import { setupNotifications } from "@/notifications/setup";
 
+// La pantalla de arranque (logo sobre azul) queda visible hasta que sepamos si hay sesión.
+void SplashScreen.preventAutoHideAsync();
+
 function Routes() {
   const { status, error, recheck, onboarded } = useAuth();
+  const ready = status !== "loading" && !(status === "ready" && onboarded === null);
+  useEffect(() => {
+    if (ready) SplashScreen.hide();
+  }, [ready]);
 
-  if (status === "loading" || (status === "ready" && onboarded === null))
-    return (
-      <GradientScreen style={{ justifyContent: "center", alignItems: "center" }}>
-        <ActivityIndicator color="#fff" size="large" />
-        <Text style={{ color: "#C9CDEB", marginTop: 12 }}>Cargando…</Text>
-      </GradientScreen>
-    );
+
+  if (!ready) return null; // sigue visible la pantalla de arranque
   if (status === "error")
     return (
       <GradientScreen style={{ justifyContent: "center", gap: 12 }}>
