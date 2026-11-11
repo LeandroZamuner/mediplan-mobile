@@ -28,6 +28,24 @@ npm test && npm run typecheck && npm run lint
 npx expo start
 ```
 
+## Versión instalable (development build)
+
+Expo Go no soporta bien las notificaciones en Android, así que para probar las alarmas se usa una *development build*
+(un APK propio). Se genera en la nube con EAS (plan gratuito):
+
+```bash
+npx eas-cli login                                       # tu cuenta de expo.dev
+npx eas-cli build --profile development --platform android
+```
+
+Al terminar, EAS da un enlace/QR para instalar el APK en el celular. Después:
+
+```bash
+EXPO_PUBLIC_API_URL=http://<IP-de-tu-compu>:8080 npx expo start --dev-client   # celular y compu en la misma red wifi
+```
+
+El paquete de Android es `com.leandrozamuner.mediplan` (se puede cambiar hasta la primera publicación en Google Play).
+
 ## Licencia
 
 [MIT](LICENSE): podés usar, copiar y modificar el código manteniendo el aviso de autor, sin garantía.
