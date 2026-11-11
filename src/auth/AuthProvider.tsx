@@ -3,7 +3,7 @@ import { onAuthStateChanged, signOut as fbSignOut, type User } from "firebase/au
 import { createContext, useCallback, useContext, useEffect, useMemo, useState, type ReactNode } from "react";
 import { ApiError, api } from "@/lib/api";
 import { firebaseAuth } from "@/lib/firebase";
-import type { Me, Plan } from "@/lib/types";
+import type { CaregiverLink, Me, Plan } from "@/lib/types";
 import { needsOnboarding } from "./onboarding";
 
 /** loading · signedOut · needsVerification (correo sin verificar) · ready (`me` disponible) · error */
@@ -73,8 +73,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         } else throw e;
       }
       const done = (await AsyncStorage.getItem(onboardedKey(user.uid)).catch(() => null)) === "1";
-      const plans = await api<Plan[]>("/plans").catch(() => [] as Plan[]);
-      setOnboarded(!needsOnboarding(done, plans.length));
+      const [plans, supervised, invitations] = await Promise.all([
+        api<Plan[]>("/plans").catch(() => [] as Plan[]),
+        api<Plan[]>("/plans/supervised").catch(() => [] as Plan[]),
+        api<CaregiverLink[]>("/invitations").catch(() => [] as CaregiverLink[]),
+      ]);
+      setOnboarded(!needsOnboarding(done, { planCount: plans.length, supervisedCount: supervised.length, invitationCount: invitations.length }));
       setMe(profile);
       setError(null);
       setStatus("ready");

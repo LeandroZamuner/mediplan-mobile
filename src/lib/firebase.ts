@@ -1,7 +1,7 @@
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { getApp, getApps, initializeApp } from "firebase/app";
 // @ts-expect-error getReactNativePersistence solo existe en el build de React Native de firebase/auth
-import { getAuth, getReactNativePersistence, initializeAuth, type Auth } from "firebase/auth";
+import { connectAuthEmulator, getAuth, getReactNativePersistence, initializeAuth, type Auth } from "firebase/auth";
 
 /** Autenticación de Firebase con la sesión guardada en el celular. La config es pública (la seguridad está en las reglas de Firebase). */
 export function firebaseAuth(): Auth {
@@ -13,5 +13,8 @@ export function firebaseAuth(): Auth {
   });
   const auth = initializeAuth(app, { persistence: getReactNativePersistence(AsyncStorage) });
   auth.languageCode = "es";
+  // Solo desarrollo: con EXPO_PUBLIC_FIREBASE_AUTH_EMULATOR=http://<host>:9099 se usa el emulador local de Firebase Auth (sin correos reales).
+  const emulator = process.env.EXPO_PUBLIC_FIREBASE_AUTH_EMULATOR;
+  if (emulator) connectAuthEmulator(auth, emulator, { disableWarnings: true });
   return auth;
 }

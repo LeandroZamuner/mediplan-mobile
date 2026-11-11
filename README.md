@@ -28,6 +28,22 @@ npm test && npm run typecheck && npm run lint
 npx expo start
 ```
 
+## Probar con el emulador local de Firebase Auth (sin correos reales)
+
+Sirve para probar cuentas, cuidadores e invitaciones sin depender de casillas de correo:
+
+```bash
+npx firebase-tools emulators:start --only auth --project mediplan-4f001      # Auth en :9099
+# API aparte, con base propia y el emulador:
+FIREBASE_AUTH_EMULATOR_HOST=127.0.0.1:9099 FIREBASE_PROJECT_ID=mediplan-4f001 PORT=8090 \
+  DATABASE_URL=postgres://mediplan:mediplan@localhost:5432/mediplan_emu?sslmode=disable JOB_SECRET=dev-local-secret go run ./cmd/api
+# App:
+EXPO_PUBLIC_FIREBASE_AUTH_EMULATOR=http://10.0.2.2:9099 EXPO_PUBLIC_API_URL=http://10.0.2.2:8090 npx expo start
+```
+
+En el emulador las cuentas no mandan correo: se verifican con `POST /identitytoolkit.googleapis.com/v1/projects/<id>/accounts:update`
+(`Authorization: Bearer owner`, `{"localId": "...", "emailVerified": true}`).
+
 ## Versión instalable (development build)
 
 Expo Go no soporta bien las notificaciones en Android, así que para probar las alarmas se usa una *development build*
