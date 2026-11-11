@@ -1,0 +1,31 @@
+import { ActivityIndicator, Pressable, StyleSheet, Text } from "react-native";
+import { colors, radius } from "@/theme/tokens";
+
+type Props = {
+  title: string;
+  onPress?: () => void;
+  variant?: "primary" | "soft" | "ghost" | "danger";
+  disabled?: boolean;
+  loading?: boolean;
+  onDark?: boolean;
+};
+
+export function Button({ title, onPress, variant = "primary", disabled, loading, onDark }: Props) {
+  const off = disabled || loading;
+  const bg =
+    variant === "primary" ? (off && onDark ? colors.onDarkDisabled : off ? "#B8BCC9" : colors.primary)
+    : variant === "soft" ? colors.primarySoft
+    : variant === "danger" ? colors.danger
+    : "transparent";
+  const fg = variant === "primary" || variant === "danger" ? (off && onDark ? "#8D95C9" : "#fff") : variant === "soft" ? colors.primary : onDark ? "#fff" : colors.text;
+  return (
+    <Pressable accessibilityRole="button" onPress={onPress} disabled={off} style={[s.btn, { backgroundColor: bg }]}>
+      {loading ? <ActivityIndicator color={fg} /> : <Text style={[s.text, { color: fg }]}>{title}</Text>}
+    </Pressable>
+  );
+}
+
+const s = StyleSheet.create({
+  btn: { height: 48, borderRadius: radius.md, alignItems: "center", justifyContent: "center", paddingHorizontal: 16 },
+  text: { fontSize: 15, fontWeight: "600" },
+});
