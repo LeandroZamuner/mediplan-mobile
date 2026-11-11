@@ -8,9 +8,9 @@ import { Button } from "@/ui/Button";
 import { ConfirmModal } from "@/ui/ConfirmModal";
 
 const SLIDES: { image: ImageSourcePropType; title: string; text: string }[] = [
-  { image: require("../../../../assets/images/onboarding-plan.png"), title: "Gestionar tu plan\nde tratamiento", text: "Organiza tus medicamentos, configura recordatorios personalizados para asegurarte de tomarlos a tiempo, y marca fácilmente si has seguido o no tu tratamiento." },
-  { image: require("../../../../assets/images/onboarding-stock.png"), title: "Controlar tu stock de medicamentos", text: "Lleva un seguimiento del stock de tus medicamentos y recibe alertas cuando queden pocas dosis para asegurarte de estar siempre preparado." },
-  { image: require("../../../../assets/images/onboarding-cuidadores.png"), title: "Sincronización\ncon cuidadores", text: "Comparte tu progreso y estado del tratamiento con familiares o cuidadores de manera automática para que estén al tanto de tu bienestar." },
+  { image: require("../../../assets/images/onboarding-plan.png"), title: "Gestionar tu plan\nde tratamiento", text: "Organiza tus medicamentos, configura recordatorios personalizados para asegurarte de tomarlos a tiempo, y marca fácilmente si has seguido o no tu tratamiento." },
+  { image: require("../../../assets/images/onboarding-stock.png"), title: "Controlar tu stock de medicamentos", text: "Lleva un seguimiento del stock de tus medicamentos y recibe alertas cuando queden pocas dosis para asegurarte de estar siempre preparado." },
+  { image: require("../../../assets/images/onboarding-cuidadores.png"), title: "Sincronización\ncon cuidadores", text: "Comparte tu progreso y estado del tratamiento con familiares o cuidadores de manera automática para que estén al tanto de tu bienestar." },
 ];
 
 /** Presentación de las funciones (3 pantallas deslizables). */
@@ -34,7 +34,7 @@ export default function Features() {
       </ScrollView>
       <View style={s.dots}>{SLIDES.map((_, i) => <View key={i} style={[s.dot, i === page && s.dotOn]} />)}</View>
       <View style={s.actions}>
-        <Button title="Configurar mi perfil" onPress={() => router.push("/onboarding/cuenta")} />
+        <Button title="Configurar mi perfil" onPress={() => router.push("/cuenta")} />
         <Button title="Omitir, por ahora" variant="soft" onPress={() => setSkipping(true)} />
       </View>
       <ConfirmModal visible={skipping} title="¿Quiere iniciar sin configurar su perfil?" message="Confirme esta acción pulsando Si. No se preocupe, puede hacerlo en cualquier momento." confirmLabel="Si" onCancel={() => setSkipping(false)} onConfirm={() => { setSkipping(false); void completeOnboarding(); }} />

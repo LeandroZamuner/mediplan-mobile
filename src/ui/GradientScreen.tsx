@@ -1,5 +1,5 @@
 import { LinearGradient } from "expo-linear-gradient";
-import { StyleSheet, View, type ViewProps } from "react-native";
+import { KeyboardAvoidingView, StyleSheet, View, type ViewProps } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { colors } from "@/theme/tokens";
 
@@ -8,7 +8,9 @@ export function GradientScreen({ children, style }: ViewProps) {
   return (
     <LinearGradient colors={[colors.gradientTop, colors.gradientBottom]} style={s.fill}>
       <SafeAreaView style={s.fill}>
-        <View style={[s.body, style]}>{children}</View>
+        <KeyboardAvoidingView style={s.fill} behavior="padding">
+          <View style={[s.body, style]}>{children}</View>
+        </KeyboardAvoidingView>
       </SafeAreaView>
     </LinearGradient>
   );

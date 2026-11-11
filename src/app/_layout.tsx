@@ -37,8 +37,15 @@ function Routes() {
       <Stack.Protected guard={status === "needsVerification"}>
         <Stack.Screen name="verify" />
       </Stack.Protected>
-      <Stack.Protected guard={status === "ready"}>
+      <Stack.Protected guard={status === "ready" && !onboarded}>
+        <Stack.Screen name="(onboarding)" />
+      </Stack.Protected>
+      <Stack.Protected guard={status === "ready" && !!onboarded}>
         <Stack.Screen name="(app)" />
+      </Stack.Protected>
+      <Stack.Protected guard={status === "ready"}>
+        <Stack.Screen name="plan/nuevo" options={{ presentation: "modal" }} />
+        <Stack.Screen name="cuidadores/nuevo" options={{ presentation: "modal" }} />
       </Stack.Protected>
     </Stack>
   );

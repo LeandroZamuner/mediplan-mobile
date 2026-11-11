@@ -64,3 +64,8 @@ export function summarizeSchedules(schedules: { dayOfWeek: number; timeOfDay: st
   const dayText = days.length === 7 ? "Todos los días" : days.map((d) => WEEKDAYS_SHORT[d]).join(", ");
   return `${dayText} · ${times.join(", ")}`;
 }
+
+/** Desde las 00:00 de hoy hasta el final del día `daysAhead` días después (hora local de `tz`), como instantes UTC (ISO). */
+export function upcomingRange(tz: string, daysAhead: number, now = new Date()): { from: string; to: string } {
+  return { from: localDayRange(tz, now).from, to: localDayRange(tz, new Date(now.getTime() + daysAhead * 24 * 3600 * 1000)).to };
+}

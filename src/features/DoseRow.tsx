@@ -1,7 +1,7 @@
 import { Feather } from "@expo/vector-icons";
 import { Pressable, StyleSheet, Text, View } from "react-native";
 import { colors, radius } from "@/theme/tokens";
-import { formatTime } from "@/lib/dates";
+import { whenLabel } from "@/lib/when";
 import type { TodayDose } from "@/lib/doses";
 
 export function DoseRow({ dose, tz, onToggle }: { dose: TodayDose; tz: string; onToggle?: () => void }) {
@@ -13,7 +13,7 @@ export function DoseRow({ dose, tz, onToggle }: { dose: TodayDose; tz: string; o
       </View>
       <View style={s.texts}>
         <Text style={s.name}>{dose.medicationName} {dose.dose}</Text>
-        <Text style={s.when}>Hoy a las {formatTime(dose.scheduledAt, tz)}</Text>
+        <Text style={s.when}>{whenLabel(dose.scheduledAt, tz, new Date())}</Text>
       </View>
       <Pressable accessibilityRole="checkbox" accessibilityState={{ checked: taken }} disabled={taken} onPress={onToggle} style={[s.box, taken && s.boxOn]}>
         {taken ? <Feather name="check" size={14} color="#fff" /> : null}

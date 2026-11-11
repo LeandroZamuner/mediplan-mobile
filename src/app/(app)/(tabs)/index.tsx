@@ -92,10 +92,10 @@ export default function Home() {
         {plans.isLoading || doses.isLoading ? (
           <Text style={s.muted}>Cargando…</Text>
         ) : list.length === 0 ? (
-          <Text style={s.muted}>No tenés tomas programadas para hoy.</Text>
+          <Text style={s.muted}>No tenés tomas programadas para los próximos días.</Text>
         ) : (
           <View style={s.list}>
-            {list.map((d) => (
+            {list.slice(0, 4).map((d) => (
               <DoseRow key={d.scheduledAt + d.medicationId} dose={d} tz={tz} onToggle={() => setAsking(d)} />
             ))}
           </View>

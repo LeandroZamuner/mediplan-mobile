@@ -26,7 +26,7 @@ export default function AccountCreated() {
       <Text style={s.title}>{"¡Cuenta creada\ncon éxito!"}</Text>
       <Text style={s.text}>Complete la información de su perfil ahora para tener un mejor control de su salud y recibir recordatorios para tomar sus medicamentos a tiempo.</Text>
       <View style={s.actions}>
-        <Button title="Crear plan de tratamiento" onPress={() => router.push("/onboarding/funciones")} />
+        <Button title="Crear plan de tratamiento" onPress={() => router.push("/funciones")} />
         <Button title="Omitir, por ahora" variant="ghost" onDark onPress={() => setSkipping(true)} />
       </View>
       <ConfirmModal visible={skipping} title="¿Quiere iniciar sin configurar su perfil?" message="Confirme esta acción pulsando Si. No se preocupe, puede hacerlo en cualquier momento." confirmLabel="Si" onCancel={() => setSkipping(false)} onConfirm={() => { setSkipping(false); void completeOnboarding(); }} />

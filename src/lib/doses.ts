@@ -1,14 +1,14 @@
 import useSWR from "swr";
 import { api } from "@/lib/api";
-import { localDayRange } from "@/lib/dates";
+import { upcomingRange } from "@/lib/dates";
 import type { Occurrence, Plan } from "@/lib/types";
 
 export type TodayDose = Occurrence & { planId: string; planName: string; dose: string };
 
-/** Tomas de HOY (hora local del usuario) de los planes indicados, ordenadas por hora. */
+/** Tomas desde las 00:00 de hoy hasta el fin de pasado mañana (hora local del usuario), ordenadas por hora. */
 export function useTodayDoses(plans: Plan[] | undefined, tz: string) {
   const active = plans?.filter((p) => p.status === "active") ?? [];
-  const { from, to } = localDayRange(tz);
+  const { from, to } = upcomingRange(tz, 2);
   const key = plans ? ["doses-today", from, ...active.map((p) => p.id)] : null;
   return useSWR<TodayDose[]>(
     key,
