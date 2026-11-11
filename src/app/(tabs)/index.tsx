@@ -1,4 +1,5 @@
 import { Feather } from "@expo/vector-icons";
+import { router } from "expo-router";
 import { useEffect, useState } from "react";
 import { Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
@@ -99,6 +100,8 @@ export default function Home() {
             ))}
           </View>
         )}
+
+        <Button title="Ver lista completa" variant="soft" onPress={() => router.push("/recordatorios")} />
 
         <Text style={s.h2}>Familiar y cuidadores</Text>
         <Text style={s.muted}>

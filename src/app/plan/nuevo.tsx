@@ -1,5 +1,5 @@
 import { Feather } from "@expo/vector-icons";
-import { router } from "expo-router";
+import { router, useLocalSearchParams } from "expo-router";
 import { useState } from "react";
 import { Pressable, StyleSheet, Text, View } from "react-native";
 import { useSWRConfig } from "swr";
@@ -31,6 +31,7 @@ export default function NewPlan() {
   const { me } = useAuth();
   const tz = me?.timezone ?? "America/Argentina/Buenos_Aires";
   const { mutate } = useSWRConfig();
+  const { planId } = useLocalSearchParams<{ planId?: string }>(); // con planId: agrega medicamentos a un plan existente
   const [step, setStep] = useState(1);
   const [drafts, setDrafts] = useState<MedicationDraft[]>([]);
   const [d, setD] = useState<MedicationDraft>(() => emptyDraft(todayIn(tz)));
@@ -47,9 +48,15 @@ export default function NewPlan() {
     setBusy(true);
     setError("");
     try {
-      const plan = await api<Plan>("/plans", { method: "POST", json: { name: "Mi plan", medications: drafts.map(toCreateBody) } });
+      let created: Plan["medications"] = [];
+      if (planId) {
+        for (const m of drafts) created.push(await api<Plan["medications"][number]>(`/plans/${planId}/medications`, { method: "POST", json: toCreateBody(m) }));
+      } else {
+        const plan = await api<Plan>("/plans", { method: "POST", json: { name: "Mi plan", medications: drafts.map(toCreateBody) } });
+        created = plan.medications;
+      }
       const offsets: Record<string, number> = {};
-      plan.medications.forEach((m, i) => {
+      created.forEach((m, i) => {
         const min = drafts[i]?.reminderMin;
         if (min) offsets[m.id] = min;
       });
@@ -105,7 +112,7 @@ export default function NewPlan() {
           title="Revisar información del plan"
           subtitle="Puede ajustar el plan de los medicamentos añadidos o agregar otros antes de guardar."
           onClose={close}
-          footer={<View style={s.full}><Button title="Guardar plan de tratamiento" loading={busy} disabled={drafts.length === 0} onPress={() => void save()} /></View>}
+          footer={<View style={s.full}><Button title={planId ? "Guardar medicamentos" : "Guardar plan de tratamiento"} loading={busy} disabled={drafts.length === 0} onPress={() => void save()} /></View>}
         >
           {drafts.map((m, i) => (
             <View key={`${m.name}-${i}`} style={s.card}>

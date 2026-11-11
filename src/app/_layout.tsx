@@ -1,10 +1,14 @@
-import { Stack } from "expo-router";
+import { Stack, router } from "expo-router";
 import { StatusBar } from "expo-status-bar";
 import { AuthProvider, useAuth } from "@/auth/AuthProvider";
 import { GradientScreen } from "@/ui/GradientScreen";
 import { Button } from "@/ui/Button";
 import { useEffect } from "react";
 import { Text } from "react-native";
+import * as Notifications from "expo-notifications";
+import { recordTaken } from "@/lib/doses";
+import { handleDoseAction } from "@/notifications/respond";
+import { DOSE_CATEGORY, DOSE_CHANNEL } from "@/notifications/sync";
 import { setupNotifications } from "@/notifications/setup";
 
 function Routes() {
@@ -35,6 +39,9 @@ function Routes() {
       <Stack.Protected guard={status === "ready"}>
         <Stack.Screen name="plan/nuevo" options={{ presentation: "modal" }} />
         <Stack.Screen name="cuidadores/nuevo" options={{ presentation: "modal" }} />
+        <Stack.Screen name="historial" />
+        <Stack.Screen name="recordatorios" />
+        <Stack.Screen name="medicamento" />
       </Stack.Protected>
     </Stack>
   );
@@ -43,6 +50,21 @@ function Routes() {
 export default function RootLayout() {
   useEffect(() => {
     void setupNotifications();
+    const sub = Notifications.addNotificationResponseReceivedListener((r) => {
+      const { title, body, data } = r.notification.request.content;
+      const action = r.actionIdentifier === Notifications.DEFAULT_ACTION_IDENTIFIER ? "default" : r.actionIdentifier;
+      void handleDoseAction(action, data ?? {}, { title, body }, {
+        recordTaken,
+        openList: () => router.push("/recordatorios"),
+        now: () => new Date(),
+        scheduleAt: (date, content, d) =>
+          Notifications.scheduleNotificationAsync({
+            content: { title: content.title ?? "", body: content.body ?? "", categoryIdentifier: DOSE_CATEGORY, data: d },
+            trigger: { type: Notifications.SchedulableTriggerInputTypes.DATE, date, channelId: DOSE_CHANNEL },
+          }),
+      });
+    });
+    return () => sub.remove();
   }, []);
   return (
     <AuthProvider>
