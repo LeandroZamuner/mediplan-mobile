@@ -68,6 +68,15 @@ export default function Plan() {
           <Text style={s.historyText}>Ver historial completo</Text>
         </Pressable>
 
+        <Pressable style={s.history} onPress={() => router.push("/stock")}>
+          <Feather name="bar-chart-2" size={16} color={colors.text} />
+          <Text style={s.historyText}>Stock y consumos</Text>
+        </Pressable>
+        <Pressable style={s.history} onPress={() => router.push("/planes")}>
+          <Feather name="archive" size={16} color={colors.text} />
+          <Text style={s.historyText}>Planes finalizados y cancelados</Text>
+        </Pressable>
+
         <Text style={s.h2}>Familiares y cuidadores</Text>
         <Text style={s.muted}>
           {accepted.length ? "Enviaremos una notificación a las siguientes personas para que estén al pendiente de su medicación." : "Todavía no tenés cuidadores con la invitación aceptada."}

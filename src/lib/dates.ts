@@ -69,3 +69,8 @@ export function summarizeSchedules(schedules: { dayOfWeek: number; timeOfDay: st
 export function upcomingRange(tz: string, daysAhead: number, now = new Date()): { from: string; to: string } {
   return { from: localDayRange(tz, now).from, to: localDayRange(tz, new Date(now.getTime() + daysAhead * 24 * 3600 * 1000)).to };
 }
+
+/** Los últimos `days` días hasta el final de hoy (hora local de `tz`), como instantes UTC (ISO). */
+export function pastRange(tz: string, days: number, now = new Date()): { from: string; to: string } {
+  return { from: localDayRange(tz, new Date(now.getTime() - days * 24 * 3600 * 1000)).from, to: localDayRange(tz, now).to };
+}

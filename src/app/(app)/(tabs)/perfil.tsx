@@ -7,7 +7,17 @@ import { useCaregivers, usePlans } from "@/features/usePlans";
 import { colors, radius } from "@/theme/tokens";
 import { Button } from "@/ui/Button";
 
-const ITEMS = ["Información de mi cuenta", "Privacidad y seguridad", "Preferencias de idioma", "Configurar notificaciones"];
+const ITEMS: { label: string; href: "/cuenta" | "/privacidad" | "/idioma" | "/ajustes-notificaciones" | "/supervisados" | "/stock" | "/notificaciones" }[] = [
+  { label: "Información de mi cuenta", href: "/cuenta" },
+  { label: "Privacidad y seguridad", href: "/privacidad" },
+  { label: "Preferencias de idioma", href: "/idioma" },
+  { label: "Configurar notificaciones", href: "/ajustes-notificaciones" },
+];
+const MORE: typeof ITEMS = [
+  { label: "Personas que cuido", href: "/supervisados" },
+  { label: "Stock y consumos", href: "/stock" },
+  { label: "Notificaciones", href: "/notificaciones" },
+];
 
 export default function Perfil() {
   const { me, firebaseUser, signOut } = useAuth();
@@ -35,9 +45,9 @@ export default function Perfil() {
         <Button title="Gestionar cuidadores" variant="soft" onPress={() => router.push("/cuidadores/nuevo")} />
 
         <Text style={s.label}>Configuración</Text>
-        {ITEMS.map((t) => (
-          <Pressable key={t} style={s.item}>
-            <Text style={s.itemText}>{t}</Text>
+        {[...MORE, ...ITEMS].map((t) => (
+          <Pressable key={t.href} style={s.item} onPress={() => router.push(t.href)}>
+            <Text style={s.itemText}>{t.label}</Text>
             <Feather name="chevron-right" size={18} color={colors.textMuted} />
           </Pressable>
         ))}
