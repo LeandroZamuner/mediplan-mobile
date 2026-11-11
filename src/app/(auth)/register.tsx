@@ -1,7 +1,7 @@
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { Feather } from "@expo/vector-icons";
 import { router } from "expo-router";
-import { createUserWithEmailAndPassword, sendEmailVerification } from "firebase/auth";
+import { createUserWithEmailAndPassword, sendEmailVerification, updateProfile } from "firebase/auth";
 import { useState } from "react";
 import { Pressable, StyleSheet, Text, View } from "react-native";
 import { ROLE_KEY } from "@/auth/AuthProvider";
@@ -31,6 +31,7 @@ export default function Register() {
     try {
       await AsyncStorage.setItem(ROLE_KEY, role).catch(() => {});
       const cred = await createUserWithEmailAndPassword(firebaseAuth(), email.trim(), password);
+      await updateProfile(cred.user, { displayName: name.trim() }).catch(() => {}); // el nombre es opcional: si falla, igual se crea la cuenta
       await sendEmailVerification(cred.user);
       // El resto lo resuelve AuthProvider: pasa a "verificá tu correo".
     } catch (e) {

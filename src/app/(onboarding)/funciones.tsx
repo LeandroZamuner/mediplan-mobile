@@ -35,7 +35,7 @@ export default function Features() {
       <View style={s.dots}>{SLIDES.map((_, i) => <View key={i} style={[s.dot, i === page && s.dotOn]} />)}</View>
       <View style={s.actions}>
         <Button title="Configurar mi perfil" onPress={() => router.push("/cuenta")} />
-        <Button title="Omitir, por ahora" variant="soft" onPress={() => setSkipping(true)} />
+        <Button title="Omitir, por ahora" variant="neutral" onPress={() => setSkipping(true)} />
       </View>
       <ConfirmModal visible={skipping} title="¿Quiere iniciar sin configurar su perfil?" message="Confirme esta acción pulsando Si. No se preocupe, puede hacerlo en cualquier momento." confirmLabel="Si" onCancel={() => setSkipping(false)} onConfirm={() => { setSkipping(false); void completeOnboarding(); }} />
     </SafeAreaView>
