@@ -5,6 +5,15 @@ import { ACTION_SNOOZE, ACTION_TAKEN, DOSE_CATEGORY, DOSE_CHANNEL } from "./sync
 
 /** Cómo se muestran las notificaciones con la app abierta + canal Android + botones "Tomé" / "Posponer". */
 export async function setupNotifications(): Promise<void> {
+  try {
+    await configure();
+  } catch (e) {
+    // Sin canal/categorías las alarmas igual suenan con la configuración por defecto: no frenamos la app.
+    console.warn("[mediplan] no se pudo configurar las notificaciones:", e);
+  }
+}
+
+async function configure(): Promise<void> {
   Notifications.setNotificationHandler({
     handleNotification: async () => ({ shouldShowBanner: true, shouldShowList: true, shouldPlaySound: true, shouldSetBadge: false }),
   });

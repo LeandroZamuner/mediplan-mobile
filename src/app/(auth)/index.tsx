@@ -10,7 +10,7 @@ export default function Welcome() {
   return (
     <View style={s.fill}>
       <Image source={require("../../../assets/images/welcome.png")} style={s.photo} resizeMode="cover" />
-      <SafeAreaView style={s.fill}>
+      <SafeAreaView style={s.safe}>
         <View style={s.top} />
         <View style={s.body}>
           <View style={s.logo}><Logo width={100} /></View>
@@ -28,6 +28,7 @@ export default function Welcome() {
 
 const s = StyleSheet.create({
   fill: { flex: 1, backgroundColor: colors.gradientBottom },
+  safe: { flex: 1 },
   photo: { ...StyleSheet.absoluteFill, width: "100%", height: "100%" },
   top: { flex: 1 },
   body: { paddingHorizontal: 24, paddingBottom: 16 },

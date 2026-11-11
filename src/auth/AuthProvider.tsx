@@ -3,7 +3,8 @@ import { onAuthStateChanged, signOut as fbSignOut, type User } from "firebase/au
 import { createContext, useCallback, useContext, useEffect, useMemo, useState, type ReactNode } from "react";
 import { ApiError, api } from "@/lib/api";
 import { firebaseAuth } from "@/lib/firebase";
-import type { Me } from "@/lib/types";
+import type { Me, Plan } from "@/lib/types";
+import { needsOnboarding } from "./onboarding";
 
 /** loading · signedOut · needsVerification (correo sin verificar) · ready (`me` disponible) · error */
 export type AuthStatus = "loading" | "signedOut" | "needsVerification" | "ready" | "error";
@@ -24,7 +25,7 @@ const Ctx = createContext<Value | null>(null);
 
 /** Preferencia elegida al crear la cuenta: solo decide la pantalla de inicio, no da permisos. */
 export const ROLE_KEY = "mediplan.role";
-const ONBOARDED_KEY = "mediplan.onboarded";
+const onboardedKey = (uid: string) => `mediplan.onboarded.${uid}`;
 
 async function savedRole(): Promise<"patient" | "caregiver"> {
   try {
@@ -41,18 +42,16 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [error, setError] = useState<string | null>(null);
   const [onboarded, setOnboarded] = useState<boolean | null>(null);
 
-  useEffect(() => {
-    AsyncStorage.getItem(ONBOARDED_KEY).then((v) => setOnboarded(v === "1"), () => setOnboarded(false));
-  }, []);
-
   const completeOnboarding = useCallback(async () => {
     setOnboarded(true);
-    await AsyncStorage.setItem(ONBOARDED_KEY, "1").catch(() => {});
+    const uid = firebaseAuth().currentUser?.uid;
+    if (uid) await AsyncStorage.setItem(onboardedKey(uid), "1").catch(() => {});
   }, []);
 
   const load = useCallback(async (user: User | null) => {
     setFirebaseUser(user);
     if (!user) {
+      setOnboarded(false);
       setMe(null);
       setStatus("signedOut");
       return;
@@ -73,6 +72,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           profile = await api<Me>("/auth/register", { method: "POST", json: { role: await savedRole() } });
         } else throw e;
       }
+      const done = (await AsyncStorage.getItem(onboardedKey(user.uid)).catch(() => null)) === "1";
+      const plans = await api<Plan[]>("/plans").catch(() => [] as Plan[]);
+      setOnboarded(!needsOnboarding(done, plans.length));
       setMe(profile);
       setError(null);
       setStatus("ready");
