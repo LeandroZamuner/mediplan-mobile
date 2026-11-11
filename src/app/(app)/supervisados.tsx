@@ -1,5 +1,6 @@
+import { router } from "expo-router";
 import { useState } from "react";
-import { ScrollView, StyleSheet, Text, View } from "react-native";
+import { Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import useSWR, { useSWRConfig } from "swr";
 import { api } from "@/lib/api";
@@ -53,10 +54,11 @@ export default function Supervisados() {
         <Text style={s.h2}>Planes que supervisás</Text>
         {supervised.isLoading ? <Text style={s.muted}>Cargando…</Text> : (supervised.data ?? []).length === 0 ? <Text style={s.muted}>Todavía no supervisás ningún plan. Cuando alguien te invite y aceptes, aparece acá.</Text> : null}
         {(supervised.data ?? []).map((p) => (
-          <View key={p.id} style={s.card}>
+          <Pressable key={p.id} style={s.card} onPress={() => router.push({ pathname: "/supervisado", params: { planId: p.id } })}>
             <Text style={s.name}>{p.name}</Text>
             <Text style={s.muted}>{medicationsLabel(p) || "Sin medicamentos"}</Text>
-          </View>
+            <Text style={s.link}>Ver qué tomó y qué se salteó</Text>
+          </Pressable>
         ))}
       </ScrollView>
     </SafeAreaView>
@@ -72,5 +74,6 @@ const s = StyleSheet.create({
   err: { fontSize: 12, color: colors.danger },
   card: { backgroundColor: colors.surface, borderRadius: radius.lg, padding: 14, gap: 10 },
   name: { fontSize: 15, fontWeight: "600", color: colors.text },
+  link: { fontSize: 13, color: colors.primary, fontWeight: "600" },
   actions: { flexDirection: "row", gap: 8 },
 });

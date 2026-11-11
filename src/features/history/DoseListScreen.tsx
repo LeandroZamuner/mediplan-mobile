@@ -2,6 +2,9 @@ import { Feather } from "@expo/vector-icons";
 import { useState } from "react";
 import { FlatList, Pressable, StyleSheet, Text, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
+import useSWR from "swr";
+import { api } from "@/lib/api";
+import type { Plan } from "@/lib/types";
 import { useAuth } from "@/auth/AuthProvider";
 import { usePlans } from "@/features/usePlans";
 import { formatTime } from "@/lib/dates";
@@ -23,10 +26,13 @@ const FILTERS: { key: DoseFilter; label: string }[] = [
 ];
 
 /** Lista de tomas de un día con calendario y filtros. `editable` permite marcar tomas (Recordatorios); sin eso es solo lectura (Historial). */
-export function DoseListScreen({ title, editable, search }: { title: string; editable?: boolean; search?: boolean }) {
+export function DoseListScreen({ title, editable, search, supervisedPlanId }: { title: string; editable?: boolean; search?: boolean; supervisedPlanId?: string }) {
   const { me } = useAuth();
   const tz = me?.timezone ?? "America/Argentina/Buenos_Aires";
-  const plans = usePlans();
+  const own = usePlans();
+  const supervised = useSWR<Plan[]>(supervisedPlanId ? "/plans/supervised" : null, (p: string) => api<Plan[]>(p));
+  // Con `supervisedPlanId` se ve el plan de otra persona (solo ese plan); si no, los planes propios.
+  const plans = supervisedPlanId ? { ...supervised, data: supervised.data?.filter((p) => p.id === supervisedPlanId) } : own;
   const [date, setDate] = useState(() => todayIn(tz));
   const [picker, setPicker] = useState(false);
   const [filter, setFilter] = useState<DoseFilter>("all");
@@ -79,7 +85,7 @@ export function DoseListScreen({ title, editable, search }: { title: string; edi
             <View style={s.row}>
               <View style={{ flex: 1 }}>
                 <Text style={s.name}>{item.medicationName} {item.dose}</Text>
-                <Text style={s.when}>{formatTime(item.scheduledAt, tz)} · {taken ? "Tomado" : item.status === "missed" ? "No tomado" : "Pendiente"}</Text>
+                <Text style={s.when}>{formatTime(item.scheduledAt, tz)} · {taken ? (item.takenAt ? `Tomado a las ${formatTime(item.takenAt, tz)}` : "Tomado") : item.status === "missed" ? "No tomado" : "Pendiente"}</Text>
               </View>
               <Pressable accessibilityRole="checkbox" accessibilityState={{ checked: taken }} disabled={taken || !editable} onPress={() => setAsking(item)} style={[s.box, taken && s.boxOn]}>
                 {taken ? <Feather name="check" size={14} color="#fff" /> : null}
