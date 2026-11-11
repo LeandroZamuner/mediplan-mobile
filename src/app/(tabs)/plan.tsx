@@ -1,8 +1,10 @@
+import { router } from "expo-router";
 import { ScrollView, StyleSheet, Text, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { summarizeSchedules } from "@/lib/dates";
 import { stockLevel } from "@/lib/doses";
 import { usePlans } from "@/features/usePlans";
+import { Button } from "@/ui/Button";
 import { colors, radius } from "@/theme/tokens";
 
 /** Plan de medicación (lectura). Pendiente: agregar/eliminar medicamentos y el asistente de 3 pasos. */
@@ -14,6 +16,7 @@ export default function Plan() {
       <ScrollView contentContainerStyle={s.scroll}>
         <Text style={s.h1}>Plan de medicación</Text>
         <Text style={s.muted}>Configura y gestiona tu plan de medicación para asegurarte de seguir el tratamiento recetado.</Text>
+        <Button title={plans.length ? "Agregar plan" : "Crear plan"} variant="soft" onPress={() => router.push("/plan/nuevo")} />
         {isLoading ? <Text style={s.muted}>Cargando…</Text> : plans.length === 0 ? <Text style={s.muted}>Todavía no tenés un plan activo.</Text> : null}
         {plans.flatMap((p) =>
           p.medications.map((m) => {

@@ -13,6 +13,9 @@ type Value = {
   firebaseUser: User | null;
   me: Me | null;
   error: string | null;
+  /** null = todavía leyendo del celular. */
+  onboarded: boolean | null;
+  completeOnboarding: () => Promise<void>;
   recheck: () => Promise<void>;
   signOut: () => Promise<void>;
 };
@@ -21,6 +24,7 @@ const Ctx = createContext<Value | null>(null);
 
 /** Preferencia elegida al crear la cuenta: solo decide la pantalla de inicio, no da permisos. */
 export const ROLE_KEY = "mediplan.role";
+const ONBOARDED_KEY = "mediplan.onboarded";
 
 async function savedRole(): Promise<"patient" | "caregiver"> {
   try {
@@ -35,6 +39,16 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [firebaseUser, setFirebaseUser] = useState<User | null>(null);
   const [me, setMe] = useState<Me | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [onboarded, setOnboarded] = useState<boolean | null>(null);
+
+  useEffect(() => {
+    AsyncStorage.getItem(ONBOARDED_KEY).then((v) => setOnboarded(v === "1"), () => setOnboarded(false));
+  }, []);
+
+  const completeOnboarding = useCallback(async () => {
+    setOnboarded(true);
+    await AsyncStorage.setItem(ONBOARDED_KEY, "1").catch(() => {});
+  }, []);
 
   const load = useCallback(async (user: User | null) => {
     setFirebaseUser(user);
@@ -72,7 +86,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const recheck = useCallback(() => load(firebaseAuth().currentUser), [load]);
   const signOut = useCallback(() => fbSignOut(firebaseAuth()), []);
-  const value = useMemo(() => ({ status, firebaseUser, me, error, recheck, signOut }), [status, firebaseUser, me, error, recheck, signOut]);
+  const value = useMemo(
+    () => ({ status, firebaseUser, me, error, onboarded, completeOnboarding, recheck, signOut }),
+    [status, firebaseUser, me, error, onboarded, completeOnboarding, recheck, signOut],
+  );
   return <Ctx.Provider value={value}>{children}</Ctx.Provider>;
 }
 

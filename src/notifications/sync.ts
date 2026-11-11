@@ -11,16 +11,16 @@ export const ACTION_SNOOZE = "snooze";
 export const HORIZON_DAYS = 7;
 
 /** Reemplaza todas las alarmas locales por las tomas de los próximos días. Devuelve cuántas programó. */
-export async function syncDoseAlarms(plans: Plan[], tz: string, now = new Date()): Promise<number> {
+export async function syncDoseAlarms(plans: Plan[], tz: string, now = new Date(), offsets: Record<string, number> = {}): Promise<number> {
   await Notifications.cancelAllScheduledNotificationsAsync();
-  const triggers = planDoseTriggers(plans, tz, now, HORIZON_DAYS);
+  const triggers = planDoseTriggers(plans, tz, now, HORIZON_DAYS, offsets);
   for (const t of triggers) {
     await Notifications.scheduleNotificationAsync({
       content: {
         title: t.title,
         body: t.body,
         categoryIdentifier: DOSE_CATEGORY,
-        data: { planId: t.planId, medicationId: t.medicationId, scheduledAt: t.at.toISOString() },
+        data: { planId: t.planId, medicationId: t.medicationId, scheduledAt: t.scheduledAt.toISOString() },
       },
       trigger: { type: Notifications.SchedulableTriggerInputTypes.DATE, date: t.at, channelId: DOSE_CHANNEL },
     });

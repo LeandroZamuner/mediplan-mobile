@@ -71,3 +71,16 @@ describe("planDoseTriggers", () => {
     expect(t).toHaveLength(2);
   });
 });
+
+describe("planDoseTriggers con anticipación del recordatorio", () => {
+  const now = new Date("2026-11-10T13:00:00Z");
+  it("dado un recordatorio de 15 min antes, entonces la alarma suena 15 min antes de la toma", () => {
+    const t = planDoseTriggers([plan()], TZ, now, 14, { m1: 15 });
+    expect(t.map((x) => x.at.toISOString())).toEqual(["2026-11-17T10:45:00.000Z"]);
+  });
+  it("entonces la clave sigue siendo la hora de la toma (no la de la alarma)", () => {
+    const [t] = planDoseTriggers([plan()], TZ, now, 14, { m1: 15 });
+    expect(t.key).toBe("p1|m1|2026-11-17T11:00:00.000Z");
+    expect(t.scheduledAt.toISOString()).toBe("2026-11-17T11:00:00.000Z");
+  });
+});

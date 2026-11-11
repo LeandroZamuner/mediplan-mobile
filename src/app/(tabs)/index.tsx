@@ -1,5 +1,5 @@
 import { Feather } from "@expo/vector-icons";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useAuth } from "@/auth/AuthProvider";
@@ -8,6 +8,7 @@ import { formatTime } from "@/lib/dates";
 import { recordTaken, stockLevel, useTodayDoses, type TodayDose } from "@/lib/doses";
 import { DoseRow } from "@/features/DoseRow";
 import { useCaregivers, usePlans } from "@/features/usePlans";
+import { refreshAlarms } from "@/notifications/reminders";
 import { colors, radius } from "@/theme/tokens";
 import { Button } from "@/ui/Button";
 import { ConfirmModal } from "@/ui/ConfirmModal";
@@ -21,6 +22,11 @@ export default function Home() {
   const [asking, setAsking] = useState<TodayDose | null>(null);
   const [dismissed, setDismissed] = useState(false);
   const [toast, setToast] = useState("");
+
+  // Al abrir la app (y cuando cambian los planes) se reprograman las alarmas locales.
+  useEffect(() => {
+    if (plans.data) void refreshAlarms(plans.data, tz);
+  }, [plans.data, tz]);
 
   const planId = plans.data?.find((p) => p.status === "active")?.id;
   const caregivers = useCaregivers(planId);

@@ -1,4 +1,5 @@
 import { Feather } from "@expo/vector-icons";
+import { router } from "expo-router";
 import { Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useAuth } from "@/auth/AuthProvider";
@@ -31,7 +32,7 @@ export default function Perfil() {
         <View style={s.people}>
           {accepted.length === 0 ? <Text style={s.email}>Todavía no tenés cuidadores.</Text> : accepted.map((c) => <Text key={c.id} style={s.person}>{c.email}</Text>)}
         </View>
-        <Button title="Gestionar cuidadores" variant="soft" onPress={() => undefined} />
+        <Button title="Gestionar cuidadores" variant="soft" onPress={() => router.push("/cuidadores/nuevo")} />
 
         <Text style={s.label}>Configuración</Text>
         {ITEMS.map((t) => (

@@ -6,7 +6,10 @@ export type DoseTrigger = {
   medicationId: string;
   title: string;
   body: string;
+  /** Cuándo suena la alarma (la toma menos la anticipación del recordatorio). */
   at: Date;
+  /** Hora real de la toma. */
+  scheduledAt: Date;
 };
 
 function parts(date: Date, tz: string) {
@@ -50,7 +53,14 @@ const iso = (y: number, m: number, d: number) =>
  * Disparos de alarma de los planes activos para los próximos `days` días (incluido hoy),
  * en la zona horaria del usuario. Solo futuros, ordenados por fecha.
  */
-export function planDoseTriggers(plans: Plan[], tz: string, now: Date, days: number): DoseTrigger[] {
+export function planDoseTriggers(
+  plans: Plan[],
+  tz: string,
+  now: Date,
+  days: number,
+  /** Minutos de anticipación del recordatorio por medicamento (id → minutos). */
+  offsets: Record<string, number> = {},
+): DoseTrigger[] {
   const today = parts(now, tz);
   const out: DoseTrigger[] = [];
   for (let i = 0; i < days; i++) {
@@ -67,15 +77,17 @@ export function planDoseTriggers(plans: Plan[], tz: string, now: Date, days: num
         for (const s of med.schedules) {
           if (s.dayOfWeek !== dow) continue;
           const [hh, mm] = s.timeOfDay.split(":").map(Number);
-          const at = zonedInstant(y, m, d, hh, mm, tz);
+          const scheduledAt = zonedInstant(y, m, d, hh, mm, tz);
+          const at = new Date(scheduledAt.getTime() - (offsets[med.id] ?? 0) * 60_000);
           if (at.getTime() <= now.getTime()) continue;
           out.push({
-            key: `${plan.id}|${med.id}|${at.toISOString()}`,
+            key: `${plan.id}|${med.id}|${scheduledAt.toISOString()}`,
             planId: plan.id,
             medicationId: med.id,
             title: med.name,
             body: med.dose,
             at,
+            scheduledAt,
           });
         }
       }
