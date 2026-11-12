@@ -1,0 +1,42 @@
+import useSWR from "swr";
+import { api } from "@/lib/api";
+import { recordTakenOrQueue } from "@/lib/takes-queue";
+import { upcomingRange } from "@/lib/dates";
+import type { Occurrence, Plan } from "@/lib/types";
+
+export type TodayDose = Occurrence & { planId: string; planName: string; dose: string };
+
+/** Tomas desde las 00:00 de hoy hasta el fin de pasado mañana (hora local del usuario), ordenadas por hora. */
+export function useTodayDoses(plans: Plan[] | undefined, tz: string) {
+  const active = plans?.filter((p) => p.status === "active") ?? [];
+  const { from, to } = upcomingRange(tz, 2);
+  const key = plans ? ["doses-today", from, ...active.map((p) => p.id)] : null;
+  return useSWR<TodayDose[]>(
+    key,
+    async () => {
+      const lists = await Promise.all(
+        active.map(async (p) => {
+          const occurrences = await api<Occurrence[]>(`/plans/${p.id}/doses?from=${encodeURIComponent(from)}&to=${encodeURIComponent(to)}`);
+          return occurrences.map((o) => ({
+            ...o,
+            planId: p.id,
+            planName: p.name,
+            dose: p.medications.find((m) => m.id === o.medicationId)?.dose ?? "",
+          }));
+        }),
+      );
+      return lists.flat().sort((a, b) => a.scheduledAt.localeCompare(b.scheduledAt));
+    },
+    { refreshInterval: 60_000 },
+  );
+}
+
+/** Registra que la toma se hizo (si no hay internet, queda guardada y se envía después). */
+export const recordTaken = recordTakenOrQueue;
+
+export type StockLevel = "ok" | "low" | "out";
+
+export function stockLevel(units: number, alertAt: number): StockLevel {
+  if (units <= 0) return "out";
+  return units <= alertAt ? "low" : "ok";
+}
