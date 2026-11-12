@@ -72,6 +72,20 @@ EXPO_PUBLIC_API_URL=http://<IP-de-tu-compu>:8080 npx expo start --dev-client   #
 
 El paquete de Android es `com.leandrozamuner.mediplan` (se puede cambiar hasta la primera publicación en Google Play).
 
+## APK para probar en el celular (sin servidor de desarrollo)
+
+El perfil `preview` genera un APK independiente que ya apunta a la API de Render (la URL y el resto de la config pública de Firebase están en
+`eas.json`). La clave pública de Firebase (`EXPO_PUBLIC_FIREBASE_API_KEY`) no se guarda en el repo: se carga una vez como variable de EAS.
+
+```bash
+npx eas-cli login
+npx eas-cli env:create --environment preview --name EXPO_PUBLIC_FIREBASE_API_KEY --visibility plaintext   # pegá la clave y Enter
+npx eas-cli build --profile preview --platform android
+```
+
+Al terminar, EAS da un enlace/QR para descargar e instalar el APK (hay que permitir "instalar apps desconocidas"). La API gratuita de Render
+se duerme: el primer pedido después de un rato tarda cerca de un minuto.
+
 ## Licencia
 
 [MIT](LICENSE): podés usar, copiar y modificar el código manteniendo el aviso de autor, sin garantía.

@@ -15,12 +15,22 @@
       "distribution": "internal",
       "android": {
         "buildType": "apk"
+      },
+      "env": {
+        "EXPO_PUBLIC_API_URL": "https://mediplan-api-eqzf.onrender.com",
+        "EXPO_PUBLIC_FIREBASE_AUTH_DOMAIN": "mediplan-4f001.firebaseapp.com",
+        "EXPO_PUBLIC_FIREBASE_PROJECT_ID": "mediplan-4f001"
       }
     },
     "production": {
       "autoIncrement": true,
       "android": {
         "buildType": "app-bundle"
+      },
+      "env": {
+        "EXPO_PUBLIC_API_URL": "https://mediplan-api-eqzf.onrender.com",
+        "EXPO_PUBLIC_FIREBASE_AUTH_DOMAIN": "mediplan-4f001.firebaseapp.com",
+        "EXPO_PUBLIC_FIREBASE_PROJECT_ID": "mediplan-4f001"
       }
     }
   }
