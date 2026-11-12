@@ -1,5 +1,6 @@
 import useSWR from "swr";
 import { api } from "@/lib/api";
+import { recordTakenOrQueue } from "@/lib/takes-queue";
 import { upcomingRange } from "@/lib/dates";
 import type { Occurrence, Plan } from "@/lib/types";
 
@@ -30,10 +31,8 @@ export function useTodayDoses(plans: Plan[] | undefined, tz: string) {
   );
 }
 
-/** Registra que la toma se hizo. */
-export function recordTaken(planId: string, medicationId: string, scheduledAt: string) {
-  return api(`/plans/${planId}/medications/${medicationId}/doses`, { method: "POST", json: { scheduledAt } });
-}
+/** Registra que la toma se hizo (si no hay internet, queda guardada y se envía después). */
+export const recordTaken = recordTakenOrQueue;
 
 export type StockLevel = "ok" | "low" | "out";
 

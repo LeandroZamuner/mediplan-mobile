@@ -49,8 +49,15 @@ export default function Home() {
     const d = asking;
     setAsking(null);
     try {
-      await recordTaken(d.planId, d.medicationId, d.scheduledAt);
+      const result = await recordTaken(d.planId, d.medicationId, d.scheduledAt);
       void Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+      if (result === "queued") {
+        // Sin internet: la mostramos como tomada y se envía sola cuando vuelva la conexión.
+        await doses.mutate((cur) => cur?.map((x) => (x.scheduledAt === d.scheduledAt && x.medicationId === d.medicationId ? { ...x, status: "taken" as const } : x)), { revalidate: false });
+        setToast("Sin conexión: guardamos tu toma y la enviamos cuando vuelva internet.");
+        setTimeout(() => setToast(""), 5000);
+        return;
+      }
       await doses.mutate();
       if (accepted.length) {
         setToast("Ya enviamos una notificación a tus cuidadores.");

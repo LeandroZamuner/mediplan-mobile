@@ -48,7 +48,12 @@ export function DoseListScreen({ title, editable, search, supervisedPlanId }: { 
     const d = asking;
     setAsking(null);
     try {
-      await recordTaken(d.planId, d.medicationId, d.scheduledAt);
+      const result = await recordTaken(d.planId, d.medicationId, d.scheduledAt);
+      if (result === "queued") {
+        await doses.mutate((cur) => cur?.map((x) => (x.scheduledAt === d.scheduledAt && x.medicationId === d.medicationId ? { ...x, status: "taken" as const } : x)), { revalidate: false });
+        setError("Sin conexión: guardamos tu toma y la enviamos cuando vuelva internet.");
+        return;
+      }
       await doses.mutate();
     } catch (e) {
       setError(e instanceof Error ? e.message : "No pudimos registrar la toma.");

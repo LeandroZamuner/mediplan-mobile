@@ -6,18 +6,32 @@ import { SwrProvider } from "@/lib/SwrProvider";
 import { GradientScreen } from "@/ui/GradientScreen";
 import { Button } from "@/ui/Button";
 import { useEffect } from "react";
-import { Text } from "react-native";
+import { AppState, Text } from "react-native";
 import * as Notifications from "expo-notifications";
 import { recordTaken } from "@/lib/doses";
 import { handleDoseAction } from "@/notifications/respond";
 import { DOSE_CATEGORY, DOSE_CHANNEL } from "@/notifications/sync";
 import { setupNotifications } from "@/notifications/setup";
+import { flushPendingTakes } from "@/lib/takes-queue";
+import { useSWRConfig } from "swr";
 
 // La pantalla de arranque (logo sobre azul) queda visible hasta que sepamos si hay sesión.
 void SplashScreen.preventAutoHideAsync();
 
 function Routes() {
   const { status, error, recheck, onboarded } = useAuth();
+  const { mutate } = useSWRConfig();
+  // Tomas marcadas sin internet: se envían al abrir la app, al volver a ella y al iniciar sesión.
+  useEffect(() => {
+    if (status !== "ready") return;
+    const run = () =>
+      void flushPendingTakes().then((n) => {
+        if (n > 0) void mutate((k) => Array.isArray(k) && (k[0] === "doses-today" || k[0] === "doses-on"));
+      });
+    run();
+    const sub = AppState.addEventListener("change", (s) => s === "active" && run());
+    return () => sub.remove();
+  }, [status, mutate]);
   const ready = status !== "loading" && !(status === "ready" && onboarded === null);
   useEffect(() => {
     if (ready) SplashScreen.hide();
