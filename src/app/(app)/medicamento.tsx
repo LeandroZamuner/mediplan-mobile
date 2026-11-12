@@ -1,12 +1,14 @@
 import { router, useLocalSearchParams } from "expo-router";
 import { useState } from "react";
-import { ScrollView, StyleSheet, Text, View } from "react-native";
+import { ScrollView, StyleSheet, View } from "react-native";
+import { Text } from "@/ui/Text";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useSWRConfig } from "swr";
 import { formatDateInput, parseDateInput } from "@/features/plan/draft";
 import { usePlans } from "@/features/usePlans";
 import { api } from "@/lib/api";
-import { formatDate, summarizeSchedules } from "@/lib/dates";
+import { formatDate } from "@/lib/dates";
+import { frequencyLabel } from "@/lib/frequency-label";
 import { colors, radius } from "@/theme/tokens";
 import { BackButton } from "@/ui/BackButton";
 import { Button } from "@/ui/Button";
@@ -96,7 +98,8 @@ export default function MedicationDetail() {
             </View>
             <Text style={s.h2}>Frecuencia para tomar la medicación</Text>
             <View style={s.card}>
-              <Text style={s.body}>Horarios: {summarizeSchedules(med.schedules)}</Text>
+              <Text style={s.body}>Frecuencia: {frequencyLabel(med.schedules)}</Text>
+              <Text style={s.body}>Horarios: {[...new Set(med.schedules.map((x) => x.timeOfDay))].sort().join(", ")}</Text>
               <Text style={s.body}>Desde: {formatDate(med.startDate)}</Text>
               <Text style={s.body}>{med.endDate ? `Finaliza: ${formatDate(med.endDate)}` : "Sin fecha de fin"}</Text>
             </View>

@@ -1,12 +1,13 @@
 import { updateProfile } from "firebase/auth";
 import { useState } from "react";
-import { ScrollView, StyleSheet, Text } from "react-native";
+import { ScrollView, StyleSheet } from "react-native";
+import { Text } from "@/ui/Text";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useAuth } from "@/auth/AuthProvider";
 import { api } from "@/lib/api";
 import { firebaseAuth } from "@/lib/firebase";
 import { colors } from "@/theme/tokens";
-import { BackButton } from "@/ui/BackButton";
+import { ScreenHeader } from "@/ui/ScreenHeader";
 import { Button } from "@/ui/Button";
 import { Field } from "@/ui/Field";
 import { Labeled } from "@/ui/Labeled";
@@ -50,8 +51,7 @@ export default function Cuenta() {
   return (
     <SafeAreaView style={s.screen}>
       <ScrollView contentContainerStyle={s.pad} keyboardShouldPersistTaps="handled">
-        <BackButton onDark={false} />
-        <Text style={s.title}>Información de mi cuenta</Text>
+        <ScreenHeader title="Información de mi cuenta" />
         <Labeled label="Nombre"><Field value={name} onChangeText={setName} placeholder="Tu nombre" /></Labeled>
         <Labeled label="Correo electrónico" hint="El correo no se puede cambiar desde la app."><Field value={me?.email ?? ""} editable={false} /></Labeled>
         <Select label="Zona horaria" placeholder="Elegí tu zona" value={zone} options={ZONES.map((z) => ({ label: z.replace("_", " "), value: z }))} onChange={setZone} />

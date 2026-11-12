@@ -1,10 +1,14 @@
-import { ScrollView, StyleSheet, Text, View } from "react-native";
+import { ScrollView, StyleSheet, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { usePlans } from "@/features/usePlans";
 import { formatDate } from "@/lib/dates";
 import { medicationsLabel, PLAN_STATUS } from "@/lib/plans";
 import { colors, radius } from "@/theme/tokens";
-import { BackButton } from "@/ui/BackButton";
+import { type } from "@/theme/typography";
+import { Chip } from "@/ui/Chip";
+import { EmptyState } from "@/ui/EmptyState";
+import { ScreenHeader } from "@/ui/ScreenHeader";
+import { Text } from "@/ui/Text";
 
 /** Planes que ya no están activos: finalizados y cancelados. */
 export default function PlanesInactivos() {
@@ -13,14 +17,13 @@ export default function PlanesInactivos() {
   return (
     <SafeAreaView style={s.screen}>
       <ScrollView contentContainerStyle={s.pad}>
-        <BackButton onDark={false} />
-        <Text style={s.title}>{"Planes finalizados\ny cancelados"}</Text>
-        {isLoading ? <Text style={s.muted}>Cargando…</Text> : list.length === 0 ? <Text style={s.muted}>Todavía no tenés planes finalizados ni cancelados.</Text> : null}
+        <ScreenHeader title={"Planes finalizados\ny cancelados"} subtitle="Tus tratamientos anteriores, por si necesitás consultarlos." />
+        {!isLoading && list.length === 0 ? <EmptyState icon="archive" title="No hay planes anteriores" text="Cuando termines o canceles un plan, lo vas a encontrar acá." /> : null}
         {list.map((p) => (
           <View key={p.id} style={s.card}>
             <View style={s.row}>
-              <Text style={s.name}>{p.name}</Text>
-              <Text style={[s.tag, p.status === "cancelled" && { backgroundColor: "#F8D7DE", color: colors.danger }]}>{PLAN_STATUS[p.status].label}</Text>
+              <Text style={[s.name, { flex: 1 }]}>{p.name}</Text>
+              <Chip label={PLAN_STATUS[p.status].label} tone={p.status === "cancelled" ? "danger" : "neutral"} />
             </View>
             <Text style={s.muted}>{medicationsLabel(p) || "Sin medicamentos"}</Text>
             <Text style={s.muted}>Creado el {formatDate(p.createdAt.slice(0, 10))}</Text>
@@ -34,10 +37,8 @@ export default function PlanesInactivos() {
 const s = StyleSheet.create({
   screen: { flex: 1, backgroundColor: colors.background },
   pad: { padding: 16, gap: 12 },
-  title: { fontSize: 28, color: colors.text, marginTop: 8, lineHeight: 36 },
-  muted: { fontSize: 12, color: colors.textMuted },
-  card: { backgroundColor: colors.surface, borderRadius: radius.lg, padding: 14, gap: 6 },
-  row: { flexDirection: "row", justifyContent: "space-between", alignItems: "center" },
-  name: { fontSize: 15, fontWeight: "600", color: colors.text },
-  tag: { backgroundColor: "#DDE2E5", borderRadius: 4, paddingHorizontal: 6, paddingVertical: 2, fontSize: 11, color: colors.text, overflow: "hidden" },
+  card: { backgroundColor: colors.surface, borderRadius: radius.lg, padding: 16, gap: 6 },
+  row: { flexDirection: "row", alignItems: "center", gap: 8 },
+  name: { ...type.h3, color: colors.text },
+  muted: { ...type.small, color: colors.textMuted },
 });

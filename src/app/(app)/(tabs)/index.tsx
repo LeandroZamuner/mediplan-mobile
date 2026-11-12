@@ -1,10 +1,13 @@
 import { Feather } from "@expo/vector-icons";
 import { router } from "expo-router";
 import { useEffect, useState } from "react";
-import { Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
-import { SafeAreaView } from "react-native-safe-area-context";
+import { Pressable, StyleSheet, View } from "react-native";
+import { Text } from "@/ui/Text";
 import { useAuth } from "@/auth/AuthProvider";
 import { dueDose } from "@/lib/due";
+import { dtf } from "@/lib/intl";
+import { whenLabel } from "@/lib/when";
+import { TabScreen } from "@/ui/TabScreen";
 import { formatTime } from "@/lib/dates";
 import { recordTaken, stockLevel, useTodayDoses, type TodayDose } from "@/lib/doses";
 import { DoseRow } from "@/features/DoseRow";
@@ -14,12 +17,13 @@ import { todayProgress } from "@/lib/progress";
 import { refreshAlarms } from "@/notifications/reminders";
 import { AlarmBanner } from "@/ui/AlarmBanner";
 import { colors, radius } from "@/theme/tokens";
+import { Avatar } from "@/ui/Avatar";
 import { Button } from "@/ui/Button";
 import { ConfirmModal } from "@/ui/ConfirmModal";
 
 /** Home del paciente: toma pendiente, próximas tomas, alerta de stock y cuidadores. */
 export default function Home() {
-  const { me } = useAuth();
+  const { me, firebaseUser } = useAuth();
   const tz = me?.timezone ?? "America/Argentina/Buenos_Aires";
   const plans = usePlans();
   const doses = useTodayDoses(plans.data, tz);
@@ -40,6 +44,10 @@ export default function Home() {
   const [now] = useState(() => new Date());
   const progress = todayProgress(list, tz, now);
   const due = dueDose(list, now);
+  const next = list.find((d) => d.status === "pending" && new Date(d.scheduledAt).getTime() >= now.getTime());
+  const first = (firebaseUser?.displayName || me?.email.split("@")[0] || "").split(" ")[0];
+  const dateText = dtf("es-AR", { timeZone: tz, weekday: "long", day: "numeric", month: "long" }).format(now);
+  const subtitle = `${dateText[0].toUpperCase()}${dateText.slice(1)}${progress.total > 0 ? ` · Hoy: ${progress.taken} de ${progress.total} ${progress.total === 1 ? "toma" : "tomas"}` : ""}`;
   const low = (plans.data ?? [])
     .filter((p) => p.status === "active")
     .flatMap((p) => p.medications.filter((m) => stockLevel(m.stockUnits, m.stockAlertAt) !== "ok"));
@@ -69,9 +77,27 @@ export default function Home() {
     }
   }
 
+  const hero = due ? (
+    <View style={s.hero}>
+      <Text style={s.heroSmall}>Programado para hoy a las {formatTime(due.scheduledAt, tz)}</Text>
+      <Text style={s.heroTitle}>Tomar ahora:{"\n"}{due.medicationName} {due.dose}</Text>
+      <Text style={s.heroSmall}>¿Tomó su medicación?</Text>
+      <View style={s.heroActions}>
+        <View style={{ flex: 1 }}><Button title="No" variant="soft" onPress={() => undefined} /></View>
+        <View style={{ flex: 1 }}><Button title="Sí" variant="soft" onPress={() => setAsking(due)} /></View>
+      </View>
+    </View>
+  ) : next ? (
+    <View style={s.hero}>
+      <Text style={s.heroSmall}>Próxima toma</Text>
+      <Text style={s.heroTitle}>{next.medicationName} {next.dose}</Text>
+      <Text style={s.heroSmall}>{whenLabel(next.scheduledAt, tz, now)}</Text>
+    </View>
+  ) : null;
+
   return (
-    <SafeAreaView style={s.screen} edges={["top"]}>
-      <ScrollView contentContainerStyle={s.scroll}>
+    <>
+      <TabScreen title={first ? `Hola, ${first}` : "Hola"} subtitle={subtitle} hero={hero}>
         <AlarmBanner />
         {!dismissed && low.length > 0 && (
           <View style={s.alert}>
@@ -89,21 +115,6 @@ export default function Home() {
           </View>
         )}
 
-        {due && (
-          <View style={s.hero}>
-            <Text style={s.heroSmall}>Programado para hoy a las {formatTime(due.scheduledAt, tz)}</Text>
-            <Text style={s.heroTitle}>Tomar ahora:{"\n"}{due.medicationName} {due.dose}</Text>
-            <Text style={s.heroSmall}>¿Tomó su medicación?</Text>
-            <View style={s.heroActions}>
-              <View style={{ flex: 1 }}><Button title="No" variant="soft" onPress={() => undefined} /></View>
-              <View style={{ flex: 1 }}><Button title="Sí" variant="soft" onPress={() => setAsking(due)} /></View>
-            </View>
-          </View>
-        )}
-
-        {progress.total > 0 ? (
-          <Text style={s.progress}>Hoy: {progress.taken} de {progress.total} {progress.total === 1 ? "toma" : "tomas"}</Text>
-        ) : null}
         <Text style={s.h2}>Próxima toma de medicamentos</Text>
         {plans.isLoading || doses.isLoading ? (
           <Text style={s.muted}>Cargando…</Text>
@@ -129,11 +140,15 @@ export default function Home() {
         <View style={s.people}>
           {accepted.map((c) => (
             <View key={c.id} style={s.person}>
-              <Text style={s.personText}>{c.email}</Text>
+              <Avatar label={c.email} size={36} />
+              <View>
+                <Text style={s.personText}>{c.email.split("@")[0]}</Text>
+                <Text style={s.muted}>Cuidador</Text>
+              </View>
             </View>
           ))}
         </View>
-      </ScrollView>
+      </TabScreen>
 
       {toast ? (
         <View style={s.toast}>
@@ -151,19 +166,19 @@ export default function Home() {
         onCancel={() => setAsking(null)}
         onConfirm={() => void confirm()}
       />
-    </SafeAreaView>
+    </>
   );
 }
 
 const s = StyleSheet.create({
   screen: { flex: 1, backgroundColor: colors.background },
   scroll: { padding: 16, gap: 12, paddingBottom: 32 },
-  h2: { fontSize: 18, color: colors.text, marginTop: 8 },
+  h2: { fontSize: 20, fontWeight: "500", color: colors.text, marginTop: 8 },
   progress: { fontSize: 13, color: colors.textMuted },
   empty: { gap: 12 },
   muted: { fontSize: 12, color: colors.textMuted },
   list: { backgroundColor: colors.surface, borderRadius: radius.lg, paddingHorizontal: 12 },
-  hero: { backgroundColor: colors.primary, borderRadius: radius.lg, padding: 16, gap: 8 },
+  hero: { backgroundColor: "rgba(255,255,255,0.14)", borderRadius: radius.lg, padding: 16, gap: 6, marginTop: 8 },
   heroSmall: { color: "#E0E3F5", fontSize: 12 },
   heroTitle: { color: "#fff", fontSize: 20, fontWeight: "600" },
   heroActions: { flexDirection: "row", gap: 8 },
@@ -172,8 +187,8 @@ const s = StyleSheet.create({
   alertTitle: { color: "#fff", fontWeight: "700" },
   alertText: { color: "#fff", fontSize: 13 },
   people: { flexDirection: "row", gap: 12, flexWrap: "wrap" },
-  person: { backgroundColor: colors.surface, borderRadius: radius.pill, paddingHorizontal: 12, paddingVertical: 8 },
-  personText: { fontSize: 12, color: colors.text },
+  person: { flexDirection: "row", alignItems: "center", gap: 10, paddingRight: 8 },
+  personText: { fontSize: 14, fontWeight: "500", color: colors.text },
   bell: { alignSelf: "flex-end", width: 40, height: 40, borderRadius: 12, backgroundColor: colors.surface, alignItems: "center", justifyContent: "center" },
   badge: { position: "absolute", top: -4, right: -4, minWidth: 18, height: 18, borderRadius: 9, backgroundColor: colors.danger, alignItems: "center", justifyContent: "center", paddingHorizontal: 3 },
   badgeText: { color: "#fff", fontSize: 10, fontWeight: "700" },

@@ -1,5 +1,6 @@
 import type { ReactNode } from "react";
-import { StyleSheet, Text, View } from "react-native";
+import { StyleSheet, View } from "react-native";
+import { Text } from "@/ui/Text";
 import { colors } from "@/theme/tokens";
 
 export function Labeled({ label, hint, error, children }: { label: string; hint?: string; error?: string | null; children: ReactNode }) {

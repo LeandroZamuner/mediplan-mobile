@@ -13,7 +13,7 @@ export function Field({ onDark, style, ...rest }: TextInputProps & { onDark?: bo
 }
 
 const s = StyleSheet.create({
-  input: { height: 48, borderRadius: radius.md, paddingHorizontal: 14, fontSize: 15 },
+  input: { height: 48, borderRadius: radius.md, paddingHorizontal: 14, fontSize: 15, fontFamily: "Inter_400Regular" },
   dark: { backgroundColor: colors.onDarkField, color: "#fff" },
   light: { backgroundColor: colors.background, borderWidth: 1, borderColor: colors.border, color: colors.text },
 });

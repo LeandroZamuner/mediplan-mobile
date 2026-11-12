@@ -1,4 +1,5 @@
-import { Modal, StyleSheet, Text, View } from "react-native";
+import { Modal, StyleSheet, View } from "react-native";
+import { Text } from "@/ui/Text";
 import { colors, radius } from "@/theme/tokens";
 import { Button } from "./Button";
 

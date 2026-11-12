@@ -1,17 +1,19 @@
 import { Feather } from "@expo/vector-icons";
 import { router } from "expo-router";
 import { useState } from "react";
-import { Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
-import { SafeAreaView } from "react-native-safe-area-context";
+import { Pressable, StyleSheet, View } from "react-native";
+import { Text } from "@/ui/Text";
 import { useSWRConfig } from "swr";
 import { useCaregivers, usePlans } from "@/features/usePlans";
 import { api } from "@/lib/api";
 import { stockLevel } from "@/lib/doses";
-import { formatDate, summarizeSchedules } from "@/lib/dates";
+import { formatDate } from "@/lib/dates";
+import { frequencyLabel } from "@/lib/frequency-label";
 import type { Medication } from "@/lib/types";
 import { colors, radius } from "@/theme/tokens";
 import { Button } from "@/ui/Button";
 import { ConfirmModal } from "@/ui/ConfirmModal";
+import { TabScreen } from "@/ui/TabScreen";
 
 export default function Plan() {
   const { data, isLoading } = usePlans();
@@ -35,10 +37,8 @@ export default function Plan() {
   }
 
   return (
-    <SafeAreaView style={s.screen} edges={["top"]}>
-      <ScrollView contentContainerStyle={s.scroll}>
-        <Text style={s.h1}>Plan de medicación</Text>
-        <Text style={s.muted}>Configure y gestione su plan de medicación para asegurarse de seguir el tratamiento recetado.</Text>
+    <>
+      <TabScreen title="Plan de medicación" subtitle="Configure y gestione su plan de medicación para asegurarse de seguir el tratamiento recetado.">
         {isLoading ? <Text style={s.muted}>Cargando…</Text> : null}
         {error ? <Text style={s.err}>{error}</Text> : null}
 
@@ -50,7 +50,7 @@ export default function Plan() {
                 <Text style={s.name}>{m.name} {m.dose}</Text>
                 <Pressable accessibilityLabel={`Eliminar ${m.name}`} hitSlop={10} onPress={() => setToDelete(m)}><Feather name="x" size={18} color={colors.text} /></Pressable>
               </View>
-              <Text style={s.body}>{summarizeSchedules(m.schedules)}{m.endDate ? ` · hasta el ${formatDate(m.endDate)}` : ""}</Text>
+              <Text style={s.body}>{frequencyLabel(m.schedules)}{m.endDate ? ` · hasta el ${formatDate(m.endDate)}` : ""}</Text>
               <View style={s.row}>
                 <Text style={s.body}>Comprimidos disponibles: {m.stockUnits}</Text>
                 {level !== "ok" ? <Text style={s.tag}>{level === "out" ? "Sin stock" : "Stock bajo"}</Text> : null}
@@ -79,10 +79,10 @@ export default function Plan() {
         </Text>
         {accepted.map((c) => <Text key={c.id} style={s.body}>{c.email}</Text>)}
         {plan ? <Button title="Gestionar cuidadores" variant="soft" onPress={() => router.push("/cuidadores/nuevo")} /> : null}
-      </ScrollView>
+      </TabScreen>
 
       <ConfirmModal visible={!!toDelete} danger title={`¿Quiere eliminar el ${toDelete?.name ?? ""} ${toDelete?.dose ?? ""} de su tratamiento?`} message="Pulse el botón de “Eliminar” para confirmar la acción." confirmLabel="Sí, eliminar" onCancel={() => setToDelete(null)} onConfirm={() => void remove()} />
-    </SafeAreaView>
+    </>
   );
 }
 

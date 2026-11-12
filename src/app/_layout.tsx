@@ -1,3 +1,4 @@
+import { Inter_400Regular, Inter_500Medium, Inter_600SemiBold, Inter_700Bold, useFonts } from "@expo-google-fonts/inter";
 import { Stack, router } from "expo-router";
 import * as SplashScreen from "expo-splash-screen";
 import { StatusBar } from "expo-status-bar";
@@ -6,7 +7,8 @@ import { SwrProvider } from "@/lib/SwrProvider";
 import { GradientScreen } from "@/ui/GradientScreen";
 import { Button } from "@/ui/Button";
 import { useEffect } from "react";
-import { AppState, Text } from "react-native";
+import { AppState } from "react-native";
+import { Text } from "@/ui/Text";
 import * as Notifications from "expo-notifications";
 import { recordTaken } from "@/lib/doses";
 import { handleDoseAction } from "@/notifications/respond";
@@ -70,6 +72,7 @@ function Routes() {
 }
 
 export default function RootLayout() {
+  const [fontsLoaded] = useFonts({ Inter_400Regular, Inter_500Medium, Inter_600SemiBold, Inter_700Bold });
   useEffect(() => {
     void setupNotifications();
     const sub = Notifications.addNotificationResponseReceivedListener((r) => {
@@ -88,6 +91,7 @@ export default function RootLayout() {
     });
     return () => sub.remove();
   }, []);
+  if (!fontsLoaded) return null; // sigue visible la pantalla de arranque
   return (
     <SwrProvider>
       <AuthProvider>

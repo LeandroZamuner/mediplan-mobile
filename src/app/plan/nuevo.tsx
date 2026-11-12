@@ -1,7 +1,8 @@
 import { Feather } from "@expo/vector-icons";
 import { router, useLocalSearchParams } from "expo-router";
 import { useState } from "react";
-import { Pressable, StyleSheet, Text, View } from "react-native";
+import { Pressable, StyleSheet, View } from "react-native";
+import { Text } from "@/ui/Text";
 import { useSWRConfig } from "swr";
 import { useAuth } from "@/auth/AuthProvider";
 import { emptyDraft, formatDateInput, step1Error, step2Error, summarize, toCreateBody, type MedicationDraft } from "@/features/plan/draft";
