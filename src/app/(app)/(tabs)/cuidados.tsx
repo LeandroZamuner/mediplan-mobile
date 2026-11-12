@@ -1,8 +1,7 @@
 import { Feather } from "@expo/vector-icons";
 import { router } from "expo-router";
 import { useState } from "react";
-import { Pressable, ScrollView, StyleSheet, View } from "react-native";
-import { SafeAreaView } from "react-native-safe-area-context";
+import { Pressable, StyleSheet, View } from "react-native";
 import { useSWRConfig } from "swr";
 import { useInvitations, useSupervised } from "@/features/usePlans";
 import { api } from "@/lib/api";
@@ -13,12 +12,12 @@ import { type } from "@/theme/typography";
 import { Avatar } from "@/ui/Avatar";
 import { Button } from "@/ui/Button";
 import { EmptyState } from "@/ui/EmptyState";
-import { ScreenHeader } from "@/ui/ScreenHeader";
+import { TabScreen } from "@/ui/TabScreen";
 import { SectionTitle } from "@/ui/SectionTitle";
 import { Text } from "@/ui/Text";
 
 /** Planes de otras personas que supervisás y las invitaciones que recibiste. */
-export default function Cuidados({ withBack }: { withBack?: boolean }) {
+export default function Cuidados() {
   const { mutate } = useSWRConfig();
   const invitations = useInvitations();
   const supervised = useSupervised();
@@ -43,9 +42,7 @@ export default function Cuidados({ withBack }: { withBack?: boolean }) {
   const empty = !supervised.isLoading && pending.length === 0 && plans.length === 0;
 
   return (
-    <SafeAreaView style={s.screen} edges={["top"]}>
-      <ScrollView contentContainerStyle={s.pad}>
-        <ScreenHeader back={!!withBack} title="Cuidados" subtitle="Seguí el tratamiento de las personas que te pidieron que las acompañes." />
+    <TabScreen title="Cuidados" subtitle="Seguí el tratamiento de las personas que te pidieron que las acompañes.">
         {error ? <Text style={s.error}>{error}</Text> : null}
 
         {pending.length > 0 ? <SectionTitle>Invitaciones</SectionTitle> : null}
@@ -83,8 +80,7 @@ export default function Cuidados({ withBack }: { withBack?: boolean }) {
         {empty ? (
           <EmptyState image={require("../../../../assets/images/onboarding-cuidadores.jpg")} title="Todavía no cuidás a nadie" text="Cuando alguien te invite a supervisar su tratamiento y aceptes, vas a poder ver qué tomó y qué se salteó." />
         ) : null}
-      </ScrollView>
-    </SafeAreaView>
+    </TabScreen>
   );
 }
 

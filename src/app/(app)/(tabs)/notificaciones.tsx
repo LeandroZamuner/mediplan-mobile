@@ -1,6 +1,5 @@
 import { Feather } from "@expo/vector-icons";
-import { Pressable, ScrollView, StyleSheet, View } from "react-native";
-import { SafeAreaView } from "react-native-safe-area-context";
+import { Pressable, StyleSheet, View } from "react-native";
 import { useAuth } from "@/auth/AuthProvider";
 import { dayLabel } from "@/features/notifications-groups";
 import { unreadCount, useNotifications } from "@/features/useNotifications";
@@ -10,7 +9,7 @@ import type { AppNotification } from "@/lib/types";
 import { colors, radius } from "@/theme/tokens";
 import { type } from "@/theme/typography";
 import { EmptyState } from "@/ui/EmptyState";
-import { ScreenHeader } from "@/ui/ScreenHeader";
+import { TabScreen } from "@/ui/TabScreen";
 import { Text } from "@/ui/Text";
 
 const KIND = {
@@ -49,9 +48,7 @@ export default function Notificaciones() {
   }
 
   return (
-    <SafeAreaView style={s.screen} edges={["top"]}>
-      <ScrollView contentContainerStyle={s.pad}>
-        <ScreenHeader back={false} title="Avisos" subtitle={unread > 0 ? `Tenés ${unread} ${unread === 1 ? "aviso sin leer" : "avisos sin leer"}.` : undefined} />
+    <TabScreen title="Avisos" subtitle={unread > 0 ? `Tenés ${unread} ${unread === 1 ? "aviso sin leer" : "avisos sin leer"}.` : "Tomas sin registrar y stock bajo."}>
         {unread > 0 ? (
           <Pressable accessibilityRole="button" onPress={() => void readAll()} style={s.readAll}>
             <Feather name="check-circle" size={16} color={colors.primary} />
@@ -82,8 +79,7 @@ export default function Notificaciones() {
             })}
           </View>
         ))}
-      </ScrollView>
-    </SafeAreaView>
+    </TabScreen>
   );
 }
 

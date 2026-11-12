@@ -1,9 +1,8 @@
 import { Feather } from "@expo/vector-icons";
 import { router } from "expo-router";
 import { useState } from "react";
-import { Pressable, ScrollView, StyleSheet, View } from "react-native";
+import { Pressable, StyleSheet, View } from "react-native";
 import { Text } from "@/ui/Text";
-import { SafeAreaView } from "react-native-safe-area-context";
 import { useSWRConfig } from "swr";
 import { useCaregivers, usePlans } from "@/features/usePlans";
 import { api } from "@/lib/api";
@@ -14,7 +13,7 @@ import type { Medication } from "@/lib/types";
 import { colors, radius } from "@/theme/tokens";
 import { Button } from "@/ui/Button";
 import { ConfirmModal } from "@/ui/ConfirmModal";
-import { ScreenHeader } from "@/ui/ScreenHeader";
+import { TabScreen } from "@/ui/TabScreen";
 
 export default function Plan() {
   const { data, isLoading } = usePlans();
@@ -38,9 +37,8 @@ export default function Plan() {
   }
 
   return (
-    <SafeAreaView style={s.screen} edges={["top"]}>
-      <ScrollView contentContainerStyle={s.scroll}>
-        <ScreenHeader back={false} title="Plan de medicación" subtitle="Configure y gestione su plan de medicación para asegurarse de seguir el tratamiento recetado." />
+    <>
+      <TabScreen title="Plan de medicación" subtitle="Configure y gestione su plan de medicación para asegurarse de seguir el tratamiento recetado.">
         {isLoading ? <Text style={s.muted}>Cargando…</Text> : null}
         {error ? <Text style={s.err}>{error}</Text> : null}
 
@@ -81,10 +79,10 @@ export default function Plan() {
         </Text>
         {accepted.map((c) => <Text key={c.id} style={s.body}>{c.email}</Text>)}
         {plan ? <Button title="Gestionar cuidadores" variant="soft" onPress={() => router.push("/cuidadores/nuevo")} /> : null}
-      </ScrollView>
+      </TabScreen>
 
       <ConfirmModal visible={!!toDelete} danger title={`¿Quiere eliminar el ${toDelete?.name ?? ""} ${toDelete?.dose ?? ""} de su tratamiento?`} message="Pulse el botón de “Eliminar” para confirmar la acción." confirmLabel="Sí, eliminar" onCancel={() => setToDelete(null)} onConfirm={() => void remove()} />
-    </SafeAreaView>
+    </>
   );
 }
 

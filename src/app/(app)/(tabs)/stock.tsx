@@ -1,8 +1,7 @@
 import { Feather } from "@expo/vector-icons";
 import { router } from "expo-router";
 import { useState } from "react";
-import { Modal, ScrollView, StyleSheet, View } from "react-native";
-import { SafeAreaView } from "react-native-safe-area-context";
+import { Modal, StyleSheet, View } from "react-native";
 import useSWR, { useSWRConfig } from "swr";
 import { useAuth } from "@/auth/AuthProvider";
 import { usePlans } from "@/features/usePlans";
@@ -17,7 +16,7 @@ import { Button } from "@/ui/Button";
 import { Chip } from "@/ui/Chip";
 import { EmptyState } from "@/ui/EmptyState";
 import { Field } from "@/ui/Field";
-import { ScreenHeader } from "@/ui/ScreenHeader";
+import { TabScreen } from "@/ui/TabScreen";
 import { SectionTitle } from "@/ui/SectionTitle";
 import { Text } from "@/ui/Text";
 
@@ -57,9 +56,8 @@ export default function Stock() {
   }
 
   return (
-    <SafeAreaView style={s.screen} edges={["top"]}>
-      <ScrollView contentContainerStyle={s.pad}>
-        <ScreenHeader back={false} title="Stock" subtitle="Controlá cuántos comprimidos te quedan y cómo venís con tu tratamiento." />
+    <>
+      <TabScreen title="Stock" subtitle="Controlá cuántos comprimidos te quedan y cómo venís con tu tratamiento.">
 
         {!plan ? (
           <EmptyState image={require("../../../../assets/images/onboarding-stock.jpg")} title="Todavía no hay medicamentos" text="Cuando crees tu plan de tratamiento vas a ver acá cuánto stock tenés y te avisamos cuando quede poco.">
@@ -99,7 +97,7 @@ export default function Stock() {
             })}
           </>
         )}
-      </ScrollView>
+      </TabScreen>
 
       <Modal visible={!!refilling} transparent animationType="fade" onRequestClose={() => setRefilling(null)}>
         <View style={s.scrim}>
@@ -115,7 +113,7 @@ export default function Stock() {
           </View>
         </View>
       </Modal>
-    </SafeAreaView>
+    </>
   );
 }
 

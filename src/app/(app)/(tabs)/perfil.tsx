@@ -1,7 +1,6 @@
 import { Feather } from "@expo/vector-icons";
 import { router } from "expo-router";
-import { Pressable, ScrollView, StyleSheet, View } from "react-native";
-import { SafeAreaView } from "react-native-safe-area-context";
+import { Pressable, StyleSheet, View } from "react-native";
 import { useAuth } from "@/auth/AuthProvider";
 import { useCaregivers, useInvitations, usePlans, useSupervised } from "@/features/usePlans";
 import { colors, radius } from "@/theme/tokens";
@@ -9,6 +8,7 @@ import { type } from "@/theme/typography";
 import { Avatar } from "@/ui/Avatar";
 import { Button } from "@/ui/Button";
 import { SectionTitle } from "@/ui/SectionTitle";
+import { TabScreen } from "@/ui/TabScreen";
 import { Text } from "@/ui/Text";
 
 type Href = "/cuidados" | "/cuenta" | "/privacidad" | "/idioma" | "/ajustes-notificaciones" | "/politica-privacidad" | "/aviso-medico";
@@ -35,8 +35,8 @@ export default function Perfil() {
   const name = firebaseUser?.displayName || me?.email.split("@")[0] || "";
 
   return (
-    <SafeAreaView style={s.screen} edges={["top"]}>
-      <ScrollView contentContainerStyle={s.pad}>
+    <TabScreen
+      hero={
         <View style={s.head}>
           <Avatar label={name} size={72} square />
           <View style={{ flex: 1 }}>
@@ -44,13 +44,14 @@ export default function Perfil() {
             <Text style={s.email}>{me?.email}</Text>
           </View>
           <Pressable accessibilityRole="button" accessibilityLabel="Editar perfil" onPress={() => router.push("/cuenta")} style={s.edit}>
-            <Feather name="edit-2" size={18} color={colors.text} />
+            <Feather name="edit-2" size={18} color="#fff" />
           </Pressable>
         </View>
-
+      }
+    >
         <SectionTitle>Familiares y cuidadores</SectionTitle>
         {accepted.length === 0 ? (
-          <Text style={s.email}>Todavía no tenés cuidadores con la invitación aceptada.</Text>
+          <Text style={s.muted}>Todavía no tenés cuidadores con la invitación aceptada.</Text>
         ) : (
           <View style={s.people}>
             {accepted.map((c) => (
@@ -58,7 +59,7 @@ export default function Perfil() {
                 <Avatar label={c.email} size={40} />
                 <View>
                   <Text style={s.personName}>{c.email.split("@")[0]}</Text>
-                  <Text style={s.email}>Cuidador</Text>
+                  <Text style={s.muted}>Cuidador</Text>
                 </View>
               </View>
             ))}
@@ -76,8 +77,7 @@ export default function Perfil() {
           <Feather name="log-out" size={16} color={colors.danger} />
           <Text style={s.signOutText}>Cerrar sesión</Text>
         </Pressable>
-      </ScrollView>
-    </SafeAreaView>
+    </TabScreen>
   );
 }
 
@@ -94,9 +94,10 @@ const s = StyleSheet.create({
   screen: { flex: 1, backgroundColor: colors.background },
   pad: { padding: 16, gap: 12, paddingBottom: 32 },
   head: { flexDirection: "row", alignItems: "center", gap: 14 },
-  name: { ...type.title, fontSize: 22, lineHeight: 28, color: colors.text },
-  email: { ...type.body, color: colors.textMuted },
-  edit: { width: 44, height: 44, borderRadius: radius.md, backgroundColor: colors.surface, alignItems: "center", justifyContent: "center" },
+  name: { ...type.title, fontSize: 22, lineHeight: 28, color: "#fff" },
+  email: { ...type.body, color: "#C9CDEB" },
+  muted: { ...type.body, color: colors.textMuted },
+  edit: { width: 44, height: 44, borderRadius: radius.md, backgroundColor: "rgba(255,255,255,0.18)", alignItems: "center", justifyContent: "center" },
   people: { flexDirection: "row", flexWrap: "wrap", gap: 16 },
   person: { flexDirection: "row", alignItems: "center", gap: 10 },
   personName: { ...type.label, color: colors.text },
