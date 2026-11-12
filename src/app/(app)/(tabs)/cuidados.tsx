@@ -2,19 +2,19 @@ import { router } from "expo-router";
 import { useState } from "react";
 import { Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
-import useSWR, { useSWRConfig } from "swr";
+import { useSWRConfig } from "swr";
+import { useInvitations, useSupervised } from "@/features/usePlans";
 import { api } from "@/lib/api";
 import { medicationsLabel } from "@/lib/plans";
-import type { CaregiverLink, Plan } from "@/lib/types";
+import type { CaregiverLink } from "@/lib/types";
 import { colors, radius } from "@/theme/tokens";
-import { BackButton } from "@/ui/BackButton";
 import { Button } from "@/ui/Button";
 
 /** Planes que cuido y las invitaciones que me hicieron para cuidar. */
 export default function Supervisados() {
   const { mutate } = useSWRConfig();
-  const invitations = useSWR<CaregiverLink[]>("/invitations", (p: string) => api<CaregiverLink[]>(p));
-  const supervised = useSWR<Plan[]>("/plans/supervised", (p: string) => api<Plan[]>(p));
+  const invitations = useInvitations();
+  const supervised = useSupervised();
   const [error, setError] = useState("");
   const [busyId, setBusyId] = useState("");
 
@@ -36,8 +36,7 @@ export default function Supervisados() {
   return (
     <SafeAreaView style={s.screen}>
       <ScrollView contentContainerStyle={s.pad}>
-        <BackButton onDark={false} />
-        <Text style={s.title}>Personas que cuido</Text>
+        <Text style={s.title}>Cuidados</Text>
         {error ? <Text style={s.err}>{error}</Text> : null}
 
         {pending.length > 0 ? <Text style={s.h2}>Invitaciones</Text> : null}

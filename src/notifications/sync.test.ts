@@ -1,5 +1,5 @@
 import * as Notifications from "expo-notifications";
-import { syncDoseAlarms } from "./sync";
+import { syncDoseAlarms, syncDoseAlarmsIfChanged } from "./sync";
 import type { Plan } from "@/lib/types";
 
 jest.mock("expo-notifications", () => ({
@@ -51,5 +51,31 @@ describe("syncDoseAlarms", () => {
     expect(await syncDoseAlarms([], "America/Argentina/Buenos_Aires", new Date())).toBe(0);
     expect(Notifications.cancelAllScheduledNotificationsAsync).toHaveBeenCalledTimes(1);
     expect(Notifications.scheduleNotificationAsync).not.toHaveBeenCalled();
+  });
+});
+
+describe("syncDoseAlarmsIfChanged", () => {
+  beforeEach(() => jest.clearAllMocks());
+  const tz = "America/Argentina/Buenos_Aires";
+  const now = new Date("2026-11-10T13:00:00Z");
+
+  it("la primera vez (sin firma previa) programa y devuelve la firma", async () => {
+    const r = await syncDoseAlarmsIfChanged(plans, tz, now, {}, null);
+    expect(r.changed).toBe(true);
+    expect(r.signature).toEqual(expect.any(String));
+    expect(Notifications.scheduleNotificationAsync).toHaveBeenCalledTimes(1);
+  });
+  it("si la firma es la misma, no toca las alarmas", async () => {
+    const first = await syncDoseAlarmsIfChanged(plans, tz, now, {}, null);
+    jest.clearAllMocks();
+    const again = await syncDoseAlarmsIfChanged(plans, tz, now, {}, first.signature);
+    expect(again.changed).toBe(false);
+    expect(Notifications.cancelAllScheduledNotificationsAsync).not.toHaveBeenCalled();
+    expect(Notifications.scheduleNotificationAsync).not.toHaveBeenCalled();
+  });
+  it("si cambia la anticipación del recordatorio, reprograma", async () => {
+    const first = await syncDoseAlarmsIfChanged(plans, tz, now, {}, null);
+    const changed = await syncDoseAlarmsIfChanged(plans, tz, now, { m1: 15 }, first.signature);
+    expect(changed.changed).toBe(true);
   });
 });

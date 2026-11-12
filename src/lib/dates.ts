@@ -1,3 +1,4 @@
+import { dtf } from "./intl";
 /** Fechas y horas en la zona horaria del usuario (los horarios de los planes son hora local). */
 
 export const WEEKDAYS = ["Domingo", "Lunes", "Martes", "Miércoles", "Jueves", "Viernes", "Sábado"] as const;
@@ -5,7 +6,7 @@ export const WEEKDAYS_SHORT = ["Dom", "Lun", "Mar", "Mié", "Jue", "Vie", "Sáb"
 
 function tzOffsetMs(date: Date, tz: string): number {
   const parts = Object.fromEntries(
-    new Intl.DateTimeFormat("en-US", {
+    dtf("en-US", {
       timeZone: tz,
       hourCycle: "h23",
       year: "numeric",
@@ -25,7 +26,7 @@ function tzOffsetMs(date: Date, tz: string): number {
 /** Desde las 00:00 hasta las 24:00 locales del día de `now` en `tz`, como instantes UTC (ISO). */
 export function localDayRange(tz: string, now = new Date()): { from: string; to: string } {
   const p = Object.fromEntries(
-    new Intl.DateTimeFormat("en-CA", { timeZone: tz, year: "numeric", month: "2-digit", day: "2-digit" })
+    dtf("en-CA", { timeZone: tz, year: "numeric", month: "2-digit", day: "2-digit" })
       .formatToParts(now)
       .map((x) => [x.type, x.value]),
   );
@@ -37,11 +38,11 @@ export function localDayRange(tz: string, now = new Date()): { from: string; to:
 }
 
 export function formatTime(iso: string, tz: string): string {
-  return new Intl.DateTimeFormat("es-AR", { timeZone: tz, hour: "2-digit", minute: "2-digit", hourCycle: "h23" }).format(new Date(iso));
+  return dtf("es-AR", { timeZone: tz, hour: "2-digit", minute: "2-digit", hourCycle: "h23" }).format(new Date(iso));
 }
 
 export function formatDateTime(iso: string, tz: string): string {
-  return new Intl.DateTimeFormat("es-AR", {
+  return dtf("es-AR", {
     timeZone: tz,
     day: "numeric",
     month: "short",
@@ -53,7 +54,7 @@ export function formatDateTime(iso: string, tz: string): string {
 
 export function formatDate(isoDate: string): string {
   const [y, m, d] = isoDate.split("-").map(Number);
-  return new Intl.DateTimeFormat("es-AR", { day: "numeric", month: "short", year: "numeric", timeZone: "UTC" }).format(new Date(Date.UTC(y, m - 1, d)));
+  return dtf("es-AR", { day: "numeric", month: "short", year: "numeric", timeZone: "UTC" }).format(new Date(Date.UTC(y, m - 1, d)));
 }
 
 /** "Lun, Jue · 08:00, 20:30" a partir de los horarios de un medicamento. */

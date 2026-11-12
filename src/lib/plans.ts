@@ -1,4 +1,5 @@
 import type { Plan } from "@/lib/types";
+import { dtf } from "./intl";
 
 export const PLAN_STATUS = {
   active: { label: "Activo", tone: "ok" },
@@ -8,7 +9,7 @@ export const PLAN_STATUS = {
 
 /** Fecha de hoy (AAAA-MM-DD) en la zona horaria indicada. */
 export function todayIn(tz: string, now = new Date()): string {
-  return new Intl.DateTimeFormat("en-CA", { timeZone: tz, year: "numeric", month: "2-digit", day: "2-digit" }).format(now);
+  return dtf("en-CA", { timeZone: tz, year: "numeric", month: "2-digit", day: "2-digit" }).format(now);
 }
 
 export function medicationsLabel(plan: Plan): string {

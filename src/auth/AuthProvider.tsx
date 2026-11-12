@@ -1,9 +1,11 @@
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { onAuthStateChanged, signOut as fbSignOut, type User } from "firebase/auth";
+import { useSWRConfig } from "swr";
 import { createContext, useCallback, useContext, useEffect, useMemo, useState, type ReactNode } from "react";
 import { ApiError, api } from "@/lib/api";
 import { firebaseAuth } from "@/lib/firebase";
 import type { CaregiverLink, Me, Plan } from "@/lib/types";
+import { clearPersisted } from "@/lib/swr-cache";
 import { needsOnboarding } from "./onboarding";
 
 /** loading · signedOut · needsVerification (correo sin verificar) · ready (`me` disponible) · error */
@@ -36,6 +38,7 @@ async function savedRole(): Promise<"patient" | "caregiver"> {
 }
 
 export function AuthProvider({ children }: { children: ReactNode }) {
+  const { mutate: swrMutate } = useSWRConfig(); // el mutate ligado a nuestra caché (no el global)
   const [status, setStatus] = useState<AuthStatus>("loading");
   const [firebaseUser, setFirebaseUser] = useState<User | null>(null);
   const [me, setMe] = useState<Me | null>(null);
@@ -51,6 +54,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const load = useCallback(async (user: User | null) => {
     setFirebaseUser(user);
     if (!user) {
+      void clearPersisted();
+      void swrMutate(() => true, undefined, { revalidate: false });
       setOnboarded(false);
       setMe(null);
       setStatus("signedOut");
@@ -78,6 +83,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         api<Plan[]>("/plans/supervised").catch(() => [] as Plan[]),
         api<CaregiverLink[]>("/invitations").catch(() => [] as CaregiverLink[]),
       ]);
+      // Lo que ya pedimos acá se comparte con las pantallas (no se vuelve a pedir al abrirlas).
+      void swrMutate("/plans", plans, { revalidate: false });
+      void swrMutate("/plans/supervised", supervised, { revalidate: false });
+      void swrMutate("/invitations", invitations, { revalidate: false });
       setOnboarded(!needsOnboarding(done, { planCount: plans.length, supervisedCount: supervised.length, invitationCount: invitations.length }));
       setMe(profile);
       setError(null);
@@ -86,7 +95,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       setError(e instanceof Error ? e.message : "No pudimos conectar con MediPlan");
       setStatus("error");
     }
-  }, []);
+  }, [swrMutate]);
 
   useEffect(() => onAuthStateChanged(firebaseAuth(), (u) => void load(u)), [load]);
 

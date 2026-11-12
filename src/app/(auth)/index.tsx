@@ -1,5 +1,6 @@
 import { router } from "expo-router";
-import { Image, StyleSheet, Text, View } from "react-native";
+import { Image } from "expo-image";
+import { StyleSheet, Text, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { colors } from "@/theme/tokens";
 import { Button } from "@/ui/Button";
@@ -9,7 +10,7 @@ import { Logo } from "@/ui/Logo";
 export default function Welcome() {
   return (
     <View style={s.fill}>
-      <Image source={require("../../../assets/images/welcome.png")} style={s.photo} resizeMode="cover" />
+      <Image source={require("../../../assets/images/welcome.jpg")} style={s.photo} contentFit="cover" contentPosition="top" transition={150} />
       <SafeAreaView style={s.safe}>
         <View style={s.top} />
         <View style={s.body}>

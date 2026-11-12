@@ -9,7 +9,6 @@ import { formatTime } from "@/lib/dates";
 import { recordTaken, stockLevel, useTodayDoses, type TodayDose } from "@/lib/doses";
 import { DoseRow } from "@/features/DoseRow";
 import { useCaregivers, usePlans } from "@/features/usePlans";
-import { unreadCount, useNotifications } from "@/features/useNotifications";
 import { refreshAlarms } from "@/notifications/reminders";
 import { colors, radius } from "@/theme/tokens";
 import { Button } from "@/ui/Button";
@@ -29,9 +28,6 @@ export default function Home() {
   useEffect(() => {
     if (plans.data) void refreshAlarms(plans.data, tz);
   }, [plans.data, tz]);
-
-  const notifications = useNotifications();
-  const unread = unreadCount(notifications.data);
 
   const planId = plans.data?.find((p) => p.status === "active")?.id;
   const caregivers = useCaregivers(planId);
@@ -64,10 +60,6 @@ export default function Home() {
   return (
     <SafeAreaView style={s.screen} edges={["top"]}>
       <ScrollView contentContainerStyle={s.scroll}>
-        <Pressable accessibilityLabel="Notificaciones" onPress={() => router.push("/notificaciones")} style={s.bell}>
-          <Feather name="bell" size={20} color={colors.text} />
-          {unread > 0 ? <View style={s.badge}><Text style={s.badgeText}>{unread > 9 ? "9+" : unread}</Text></View> : null}
-        </Pressable>
         {!dismissed && low.length > 0 && (
           <View style={s.alert}>
             <View style={s.alertHead}>

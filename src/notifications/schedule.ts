@@ -1,4 +1,5 @@
 import type { Plan } from "@/lib/types";
+import { dtf } from "@/lib/intl";
 
 export type DoseTrigger = {
   key: string;
@@ -14,7 +15,7 @@ export type DoseTrigger = {
 
 function parts(date: Date, tz: string) {
   const p = Object.fromEntries(
-    new Intl.DateTimeFormat("en-CA", { timeZone: tz, year: "numeric", month: "2-digit", day: "2-digit" })
+    dtf("en-CA", { timeZone: tz, year: "numeric", month: "2-digit", day: "2-digit" })
       .formatToParts(date)
       .map((x) => [x.type, x.value]),
   );
@@ -23,7 +24,7 @@ function parts(date: Date, tz: string) {
 
 function tzOffsetMs(date: Date, tz: string): number {
   const p = Object.fromEntries(
-    new Intl.DateTimeFormat("en-US", {
+    dtf("en-US", {
       timeZone: tz,
       hourCycle: "h23",
       year: "numeric",

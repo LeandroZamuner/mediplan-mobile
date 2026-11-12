@@ -9,7 +9,6 @@ import { stockLevel } from "@/lib/doses";
 import { daysOfStockLeft, stockRatio } from "@/lib/stock";
 import type { Stats } from "@/lib/types";
 import { colors, radius } from "@/theme/tokens";
-import { BackButton } from "@/ui/BackButton";
 
 /** Stock de medicamentos y consumos (cumplimiento de los últimos 30 días). */
 export default function Stock() {
@@ -24,7 +23,6 @@ export default function Stock() {
   return (
     <SafeAreaView style={s.screen}>
       <ScrollView contentContainerStyle={s.pad}>
-        <BackButton onDark={false} />
         <Text style={s.title}>Stock y consumos</Text>
 
         <Text style={s.h2}>Últimos 30 días</Text>

@@ -2,6 +2,7 @@ import { Stack, router } from "expo-router";
 import * as SplashScreen from "expo-splash-screen";
 import { StatusBar } from "expo-status-bar";
 import { AuthProvider, useAuth } from "@/auth/AuthProvider";
+import { SwrProvider } from "@/lib/SwrProvider";
 import { GradientScreen } from "@/ui/GradientScreen";
 import { Button } from "@/ui/Button";
 import { useEffect } from "react";
@@ -74,9 +75,11 @@ export default function RootLayout() {
     return () => sub.remove();
   }, []);
   return (
-    <AuthProvider>
-      <StatusBar style="auto" />
-      <Routes />
-    </AuthProvider>
+    <SwrProvider>
+      <AuthProvider>
+        <StatusBar style="auto" />
+        <Routes />
+      </AuthProvider>
+    </SwrProvider>
   );
 }

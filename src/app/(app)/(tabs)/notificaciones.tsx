@@ -7,7 +7,6 @@ import { api } from "@/lib/api";
 import { formatDateTime } from "@/lib/dates";
 import type { AppNotification } from "@/lib/types";
 import { colors, radius } from "@/theme/tokens";
-import { BackButton } from "@/ui/BackButton";
 
 const ICON: Record<string, "alert-circle" | "package" | "bell"> = { missed_dose: "alert-circle", low_stock: "package" };
 
@@ -24,7 +23,6 @@ export default function Notificaciones() {
 
   return (
     <SafeAreaView style={s.screen}>
-      <View style={s.pad}><BackButton onDark={false} /></View>
       <Text style={s.title}>Notificaciones</Text>
       <FlatList
         data={data ?? []}
