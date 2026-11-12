@@ -16,7 +16,7 @@ export function Button({ title, onPress, variant = "primary", disabled, loading,
     variant === "primary" ? (off && onDark ? colors.onDarkDisabled : off ? "#B8BCC9" : colors.primary)
     : variant === "soft" ? (off ? "#EDEEF6" : colors.primarySoft)
     : variant === "neutral" ? colors.surface
-    : variant === "danger" ? colors.danger
+    : variant === "danger" ? (off ? "#E6A3B0" : colors.danger)
     : "transparent";
   const fg = variant === "primary" || variant === "danger" ? (off && onDark ? "#8D95C9" : "#fff") : variant === "soft" ? (off ? "#A3A9D6" : colors.primary) : variant === "neutral" ? colors.text : onDark ? "#fff" : colors.text;
   return (

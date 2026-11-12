@@ -54,4 +54,6 @@ export type CaregiverLink = {
   status: "pending" | "accepted" | "rejected";
   expiresAt: string;
   token?: string; // solo al crear la invitación
+  planName?: string; // solo en las invitaciones pendientes que recibís
+  patientEmail?: string; // quién te invita
 };

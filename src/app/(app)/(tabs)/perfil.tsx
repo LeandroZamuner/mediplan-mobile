@@ -7,11 +7,13 @@ import { useCaregivers, usePlans } from "@/features/usePlans";
 import { colors, radius } from "@/theme/tokens";
 import { Button } from "@/ui/Button";
 
-const ITEMS: { label: string; href: "/cuenta" | "/privacidad" | "/idioma" | "/ajustes-notificaciones" | "/cuidados" }[] = [
+const ITEMS: { label: string; href: "/cuenta" | "/privacidad" | "/idioma" | "/ajustes-notificaciones" | "/cuidados" | "/politica-privacidad" | "/aviso-medico" }[] = [
   { label: "Información de mi cuenta", href: "/cuenta" },
   { label: "Privacidad y seguridad", href: "/privacidad" },
   { label: "Preferencias de idioma", href: "/idioma" },
   { label: "Configurar notificaciones", href: "/ajustes-notificaciones" },
+  { label: "Política de privacidad", href: "/politica-privacidad" },
+  { label: "Aviso médico", href: "/aviso-medico" },
 ];
 const MORE: typeof ITEMS = [
   { label: "Personas que cuido", href: "/cuidados" },

@@ -42,7 +42,8 @@ export default function Supervisados() {
         {pending.length > 0 ? <Text style={s.h2}>Invitaciones</Text> : null}
         {pending.map((l) => (
           <View key={l.id} style={s.card}>
-            <Text style={s.name}>Te invitaron a supervisar un plan</Text>
+            <Text style={s.name}>{l.patientEmail ? `${l.patientEmail} te invitó a supervisar su plan` : "Te invitaron a supervisar un plan"}</Text>
+            {l.planName ? <Text style={s.muted}>Plan: {l.planName}</Text> : null}
             <View style={s.actions}>
               <View style={{ flex: 1 }}><Button title="Rechazar" variant="neutral" loading={busyId === l.id} onPress={() => void answer(l, "reject")} /></View>
               <View style={{ flex: 1 }}><Button title="Aceptar" loading={busyId === l.id} onPress={() => void answer(l, "accept")} /></View>
