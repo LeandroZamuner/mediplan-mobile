@@ -87,7 +87,7 @@ export function DoseListScreen({ title, editable, search, supervisedPlanId }: { 
                 <Text style={s.name}>{item.medicationName} {item.dose}</Text>
                 <Text style={s.when}>{formatTime(item.scheduledAt, tz)} · {taken ? (item.takenAt ? `Tomado a las ${formatTime(item.takenAt, tz)}` : "Tomado") : item.status === "missed" ? "No tomado" : "Pendiente"}</Text>
               </View>
-              <Pressable accessibilityRole="checkbox" accessibilityState={{ checked: taken }} disabled={taken || !editable} onPress={() => setAsking(item)} style={[s.box, taken && s.boxOn]}>
+              <Pressable accessibilityRole="checkbox" accessibilityLabel={`Marcar ${item.medicationName} como tomado`} accessibilityState={{ checked: taken }} hitSlop={14} disabled={taken || !editable} onPress={() => setAsking(item)} style={[s.box, taken && s.boxOn]}>
                 {taken ? <Feather name="check" size={14} color="#fff" /> : null}
               </Pressable>
             </View>

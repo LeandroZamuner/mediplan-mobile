@@ -43,7 +43,7 @@ describe("syncDoseAlarms", () => {
         categoryIdentifier: "dose",
         data: { planId: "p1", medicationId: "m1", scheduledAt: "2026-11-11T11:00:00.000Z" },
       },
-      trigger: { type: "date", date: new Date("2026-11-11T11:00:00.000Z"), channelId: "doses" },
+      trigger: { type: "date", date: new Date("2026-11-11T11:00:00.000Z"), channelId: "doses", delivery: "alarmClock" },
     });
   });
 

@@ -15,7 +15,7 @@ export function DoseRow({ dose, tz, onToggle }: { dose: TodayDose; tz: string; o
         <Text style={s.name}>{dose.medicationName} {dose.dose}</Text>
         <Text style={s.when}>{whenLabel(dose.scheduledAt, tz, new Date())}</Text>
       </View>
-      <Pressable accessibilityRole="checkbox" accessibilityState={{ checked: taken }} disabled={taken} onPress={onToggle} style={[s.box, taken && s.boxOn]}>
+      <Pressable accessibilityRole="checkbox" accessibilityLabel={`Marcar ${dose.medicationName} como tomado`} accessibilityState={{ checked: taken }} hitSlop={14} disabled={taken} onPress={onToggle} style={[s.box, taken && s.boxOn]}>
         {taken ? <Feather name="check" size={14} color="#fff" /> : null}
       </Pressable>
     </View>

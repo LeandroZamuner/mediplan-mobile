@@ -50,6 +50,6 @@ async function schedule(t: DoseTrigger): Promise<void> {
       categoryIdentifier: DOSE_CATEGORY,
       data: { planId: t.planId, medicationId: t.medicationId, scheduledAt: t.scheduledAt.toISOString() },
     },
-    trigger: { type: Notifications.SchedulableTriggerInputTypes.DATE, date: t.at, channelId: DOSE_CHANNEL },
+    trigger: { type: Notifications.SchedulableTriggerInputTypes.DATE, date: t.at, channelId: DOSE_CHANNEL, delivery: "alarmClock" },
   });
 }

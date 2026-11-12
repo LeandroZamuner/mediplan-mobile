@@ -68,7 +68,7 @@ export default function RootLayout() {
         scheduleAt: (date, content, d) =>
           Notifications.scheduleNotificationAsync({
             content: { title: content.title ?? "", body: content.body ?? "", categoryIdentifier: DOSE_CATEGORY, data: d },
-            trigger: { type: Notifications.SchedulableTriggerInputTypes.DATE, date, channelId: DOSE_CHANNEL },
+            trigger: { type: Notifications.SchedulableTriggerInputTypes.DATE, date, channelId: DOSE_CHANNEL, delivery: "alarmClock" },
           }),
       });
     });

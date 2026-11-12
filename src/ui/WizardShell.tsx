@@ -10,7 +10,7 @@ export function WizardShell({ progress, step, title, subtitle, onClose, footer, 
     <SafeAreaView style={s.screen}>
       <KeyboardAvoidingView style={s.fill} behavior={Platform.OS === "ios" ? "padding" : undefined}>
         <View style={s.head}>
-          <Pressable accessibilityLabel="Cerrar" onPress={onClose} style={s.close}>
+          <Pressable accessibilityRole="button" accessibilityLabel="Cerrar" hitSlop={6} onPress={onClose} style={s.close}>
             <Feather name="x" size={18} color={colors.text} />
           </Pressable>
           <View style={s.track}>

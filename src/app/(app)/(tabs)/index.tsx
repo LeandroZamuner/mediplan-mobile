@@ -9,7 +9,10 @@ import { formatTime } from "@/lib/dates";
 import { recordTaken, stockLevel, useTodayDoses, type TodayDose } from "@/lib/doses";
 import { DoseRow } from "@/features/DoseRow";
 import { useCaregivers, usePlans } from "@/features/usePlans";
+import * as Haptics from "expo-haptics";
+import { todayProgress } from "@/lib/progress";
 import { refreshAlarms } from "@/notifications/reminders";
+import { AlarmBanner } from "@/ui/AlarmBanner";
 import { colors, radius } from "@/theme/tokens";
 import { Button } from "@/ui/Button";
 import { ConfirmModal } from "@/ui/ConfirmModal";
@@ -35,6 +38,7 @@ export default function Home() {
 
   const list = doses.data ?? [];
   const [now] = useState(() => new Date());
+  const progress = todayProgress(list, tz, now);
   const due = dueDose(list, now);
   const low = (plans.data ?? [])
     .filter((p) => p.status === "active")
@@ -46,6 +50,7 @@ export default function Home() {
     setAsking(null);
     try {
       await recordTaken(d.planId, d.medicationId, d.scheduledAt);
+      void Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
       await doses.mutate();
       if (accepted.length) {
         setToast("Ya enviamos una notificación a tus cuidadores.");
@@ -60,6 +65,7 @@ export default function Home() {
   return (
     <SafeAreaView style={s.screen} edges={["top"]}>
       <ScrollView contentContainerStyle={s.scroll}>
+        <AlarmBanner />
         {!dismissed && low.length > 0 && (
           <View style={s.alert}>
             <View style={s.alertHead}>
@@ -88,11 +94,17 @@ export default function Home() {
           </View>
         )}
 
+        {progress.total > 0 ? (
+          <Text style={s.progress}>Hoy: {progress.taken} de {progress.total} {progress.total === 1 ? "toma" : "tomas"}</Text>
+        ) : null}
         <Text style={s.h2}>Próxima toma de medicamentos</Text>
         {plans.isLoading || doses.isLoading ? (
           <Text style={s.muted}>Cargando…</Text>
         ) : list.length === 0 ? (
-          <Text style={s.muted}>No tenés tomas programadas para los próximos días.</Text>
+          <View style={s.empty}>
+            <Text style={s.muted}>{(plans.data ?? []).some((p) => p.status === "active") ? "No tenés tomas programadas para los próximos días." : "Todavía no tenés un plan de tratamiento."}</Text>
+            {(plans.data ?? []).some((p) => p.status === "active") ? null : <Button title="Crear plan de tratamiento" onPress={() => router.push("/plan/nuevo")} />}
+          </View>
         ) : (
           <View style={s.list}>
             {list.slice(0, 4).map((d) => (
@@ -140,6 +152,8 @@ const s = StyleSheet.create({
   screen: { flex: 1, backgroundColor: colors.background },
   scroll: { padding: 16, gap: 12, paddingBottom: 32 },
   h2: { fontSize: 18, color: colors.text, marginTop: 8 },
+  progress: { fontSize: 13, color: colors.textMuted },
+  empty: { gap: 12 },
   muted: { fontSize: 12, color: colors.textMuted },
   list: { backgroundColor: colors.surface, borderRadius: radius.lg, paddingHorizontal: 12 },
   hero: { backgroundColor: colors.primary, borderRadius: radius.lg, padding: 16, gap: 8 },

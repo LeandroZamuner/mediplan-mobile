@@ -4,7 +4,7 @@ import { colors } from "@/theme/tokens";
 
 export function Checkbox({ label, checked, onChange, disabled }: { label: string; checked: boolean; onChange: (v: boolean) => void; disabled?: boolean }) {
   return (
-    <Pressable accessibilityRole="checkbox" accessibilityState={{ checked, disabled }} disabled={disabled} onPress={() => onChange(!checked)} style={[s.row, disabled && { opacity: 0.5 }]}>
+    <Pressable accessibilityRole="checkbox" accessibilityLabel={label} accessibilityState={{ checked, disabled }} hitSlop={10} disabled={disabled} onPress={() => onChange(!checked)} style={[s.row, disabled && { opacity: 0.5 }]}>
       <View style={[s.box, checked && s.on]}>{checked ? <Feather name="check" size={14} color="#fff" /> : null}</View>
       <Text style={s.label}>{label}</Text>
     </Pressable>
