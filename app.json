@@ -47,6 +47,11 @@
         }
       ]
     ],
-    "scheme": "mediplan"
+    "scheme": "mediplan",
+    "extra": {
+      "eas": {
+        "projectId": "de6e2145-f66e-44ca-9609-14b806a1bea7"
+      }
+    }
   }
 }
