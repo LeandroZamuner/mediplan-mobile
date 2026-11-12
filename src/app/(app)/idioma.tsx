@@ -1,15 +1,15 @@
 import { Feather } from "@expo/vector-icons";
-import { StyleSheet, Text, View } from "react-native";
+import { StyleSheet, View } from "react-native";
+import { Text } from "@/ui/Text";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { colors, radius } from "@/theme/tokens";
-import { BackButton } from "@/ui/BackButton";
+import { ScreenHeader } from "@/ui/ScreenHeader";
 
 export default function Idioma() {
   return (
     <SafeAreaView style={s.screen}>
       <View style={s.pad}>
-        <BackButton onDark={false} />
-        <Text style={s.title}>Preferencias de idioma</Text>
+        <ScreenHeader title="Preferencias de idioma" />
         <View style={s.row}>
           <Text style={s.name}>Español</Text>
           <Feather name="check" size={18} color={colors.primary} />

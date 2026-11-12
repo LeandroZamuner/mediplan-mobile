@@ -1,21 +1,28 @@
+import { Feather } from "@expo/vector-icons";
 import { sendEmailVerification } from "firebase/auth";
 import { useState } from "react";
-import { StyleSheet, Text, View } from "react-native";
+import { StyleSheet, View } from "react-native";
 import { useAuth } from "@/auth/AuthProvider";
 import { Button } from "@/ui/Button";
 import { GradientScreen } from "@/ui/GradientScreen";
+import { Text } from "@/ui/Text";
 
+/** Verificar el correo: mismo estilo que el resto de las pantallas de acceso (degradado azul, sin Figma propio). */
 export default function Verify() {
   const { firebaseUser, recheck, signOut } = useAuth();
   const [msg, setMsg] = useState("");
+  const [checking, setChecking] = useState(false);
+
   return (
     <GradientScreen>
-      <View style={s.spacer} />
-      <Text style={s.title}>Revisá tu correo</Text>
-      <Text style={s.body}>Te enviamos un mensaje a {firebaseUser?.email} para confirmar que es tuyo. Cuando lo abras, volvé y tocá “Ya lo verifiqué”.</Text>
-      {msg ? <Text style={s.body}>{msg}</Text> : null}
+      <View style={s.center}>
+        <View style={s.badge}><Feather name="mail" size={34} color="#fff" /></View>
+      </View>
+      <Text style={s.title}>{"Revisá\ntu correo"}</Text>
+      <Text style={s.body}>Te enviamos un mensaje a {firebaseUser?.email} para confirmar que es tuyo. Abrí el enlace y volvé acá.</Text>
+      {msg ? <Text style={s.msg}>{msg}</Text> : null}
       <View style={s.actions}>
-        <Button title="Ya lo verifiqué" onPress={() => void recheck()} />
+        <Button title="Ya lo verifiqué" loading={checking} onPress={() => { setChecking(true); void recheck().finally(() => setChecking(false)); }} />
         <Button
           title="Reenviar correo"
           variant="soft"
@@ -35,8 +42,10 @@ export default function Verify() {
 }
 
 const s = StyleSheet.create({
-  spacer: { flex: 1 },
-  title: { color: "#fff", fontSize: 24, fontWeight: "600" },
-  body: { color: "#C9CDEB", fontSize: 13, marginTop: 8, lineHeight: 19 },
+  center: { flex: 1, alignItems: "center", justifyContent: "center" },
+  badge: { width: 88, height: 88, borderRadius: 44, backgroundColor: "#2B3585", alignItems: "center", justifyContent: "center" },
+  title: { color: "#fff", fontSize: 26, fontWeight: "600", lineHeight: 32 },
+  body: { color: "#C9CDEB", fontSize: 13, lineHeight: 19, marginTop: 12 },
+  msg: { color: "#C9CDEB", fontSize: 13, marginTop: 8 },
   actions: { gap: 8, marginTop: 24 },
 });

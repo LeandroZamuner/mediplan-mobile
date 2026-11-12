@@ -1,6 +1,7 @@
 import { Feather } from "@expo/vector-icons";
 import { useState } from "react";
-import { Modal, Pressable, StyleSheet, Text, View } from "react-native";
+import { Modal, Pressable, StyleSheet, View } from "react-native";
+import { Text } from "@/ui/Text";
 import { MONTHS_SHORT, MONTHS_LONG, WEEK_HEADER, monthGrid, shiftMonth } from "@/features/history/calendar";
 import { colors } from "@/theme/tokens";
 

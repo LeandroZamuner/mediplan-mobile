@@ -1,4 +1,5 @@
-import { ActivityIndicator, Pressable, StyleSheet, Text } from "react-native";
+import { ActivityIndicator, Pressable, StyleSheet } from "react-native";
+import { Text } from "@/ui/Text";
 import { colors, radius } from "@/theme/tokens";
 
 type Props = {

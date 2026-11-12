@@ -1,7 +1,8 @@
 import { Feather } from "@expo/vector-icons";
 import { router } from "expo-router";
 import { useEffect, useState } from "react";
-import { Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
+import { Pressable, ScrollView, StyleSheet, View } from "react-native";
+import { Text } from "@/ui/Text";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useAuth } from "@/auth/AuthProvider";
 import { dueDose } from "@/lib/due";
@@ -14,6 +15,7 @@ import { todayProgress } from "@/lib/progress";
 import { refreshAlarms } from "@/notifications/reminders";
 import { AlarmBanner } from "@/ui/AlarmBanner";
 import { colors, radius } from "@/theme/tokens";
+import { Avatar } from "@/ui/Avatar";
 import { Button } from "@/ui/Button";
 import { ConfirmModal } from "@/ui/ConfirmModal";
 
@@ -129,7 +131,11 @@ export default function Home() {
         <View style={s.people}>
           {accepted.map((c) => (
             <View key={c.id} style={s.person}>
-              <Text style={s.personText}>{c.email}</Text>
+              <Avatar label={c.email} size={36} />
+              <View>
+                <Text style={s.personText}>{c.email.split("@")[0]}</Text>
+                <Text style={s.muted}>Cuidador</Text>
+              </View>
             </View>
           ))}
         </View>
@@ -158,7 +164,7 @@ export default function Home() {
 const s = StyleSheet.create({
   screen: { flex: 1, backgroundColor: colors.background },
   scroll: { padding: 16, gap: 12, paddingBottom: 32 },
-  h2: { fontSize: 18, color: colors.text, marginTop: 8 },
+  h2: { fontSize: 20, fontWeight: "500", color: colors.text, marginTop: 8 },
   progress: { fontSize: 13, color: colors.textMuted },
   empty: { gap: 12 },
   muted: { fontSize: 12, color: colors.textMuted },
@@ -172,8 +178,8 @@ const s = StyleSheet.create({
   alertTitle: { color: "#fff", fontWeight: "700" },
   alertText: { color: "#fff", fontSize: 13 },
   people: { flexDirection: "row", gap: 12, flexWrap: "wrap" },
-  person: { backgroundColor: colors.surface, borderRadius: radius.pill, paddingHorizontal: 12, paddingVertical: 8 },
-  personText: { fontSize: 12, color: colors.text },
+  person: { flexDirection: "row", alignItems: "center", gap: 10, paddingRight: 8 },
+  personText: { fontSize: 14, fontWeight: "500", color: colors.text },
   bell: { alignSelf: "flex-end", width: 40, height: 40, borderRadius: 12, backgroundColor: colors.surface, alignItems: "center", justifyContent: "center" },
   badge: { position: "absolute", top: -4, right: -4, minWidth: 18, height: 18, borderRadius: 9, backgroundColor: colors.danger, alignItems: "center", justifyContent: "center", paddingHorizontal: 3 },
   badgeText: { color: "#fff", fontSize: 10, fontWeight: "700" },

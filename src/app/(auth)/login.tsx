@@ -1,7 +1,8 @@
 import { router } from "expo-router";
 import { signInWithEmailAndPassword } from "firebase/auth";
 import { useState } from "react";
-import { StyleSheet, Text, View } from "react-native";
+import { StyleSheet, View } from "react-native";
+import { Text } from "@/ui/Text";
 import { authErrorMessage } from "@/lib/auth-errors";
 import { firebaseAuth } from "@/lib/firebase";
 import { Button } from "@/ui/Button";

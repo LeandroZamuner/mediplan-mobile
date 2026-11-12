@@ -1,5 +1,6 @@
 import type { ReactNode } from "react";
-import { ScrollView, StyleSheet, Text } from "react-native";
+import { ScrollView, StyleSheet } from "react-native";
+import { Text } from "@/ui/Text";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { colors } from "@/theme/tokens";
 import { BackButton } from "./BackButton";

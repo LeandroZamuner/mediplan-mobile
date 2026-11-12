@@ -1,10 +1,11 @@
 import * as Notifications from "expo-notifications";
 import { useCallback, useEffect, useState } from "react";
-import { AppState, Linking, ScrollView, StyleSheet, Text } from "react-native";
+import { AppState, Linking, ScrollView, StyleSheet } from "react-native";
+import { Text } from "@/ui/Text";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { alarmWarning, readAlarmStatus, requestExactAlarms, scheduleTestNotification, type AlarmStatus } from "@/notifications/permissions";
 import { colors } from "@/theme/tokens";
-import { BackButton } from "@/ui/BackButton";
+import { ScreenHeader } from "@/ui/ScreenHeader";
 import { Button } from "@/ui/Button";
 
 export default function AjustesNotificaciones() {
@@ -27,8 +28,7 @@ export default function AjustesNotificaciones() {
   return (
     <SafeAreaView style={s.screen}>
       <ScrollView contentContainerStyle={s.pad}>
-        <BackButton onDark={false} />
-        <Text style={s.title}>Configurar notificaciones</Text>
+        <ScreenHeader title="Configurar notificaciones" />
         <Text style={s.muted}>Los recordatorios de cada toma suenan en tu celular aunque no tengas internet.</Text>
 
         <Text style={s.h2}>Estado</Text>

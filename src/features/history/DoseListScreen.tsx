@@ -1,6 +1,7 @@
 import { Feather } from "@expo/vector-icons";
 import { useState } from "react";
-import { FlatList, Pressable, StyleSheet, Text, View } from "react-native";
+import { FlatList, Pressable, StyleSheet, View } from "react-native";
+import { Text } from "@/ui/Text";
 import { SafeAreaView } from "react-native-safe-area-context";
 import useSWR from "swr";
 import { api } from "@/lib/api";
@@ -65,7 +66,7 @@ export function DoseListScreen({ title, editable, search, supervisedPlanId }: { 
       <View style={s.pad}><BackButton onDark={false} /></View>
       <Text style={s.title}>{title}</Text>
       {search ? (
-        <View style={s.pad}><Field placeholder="Buscar" value={query} onChangeText={setQuery} style={s.search} /></View>
+        <View style={[s.pad, s.searchRow]}><Feather name="search" size={18} color={colors.textMuted} style={s.searchIcon} /><Field placeholder="Buscar" value={query} onChangeText={setQuery} style={s.search} /></View>
       ) : null}
       <Pressable onPress={() => setPicker(true)} style={[s.date, s.pad]}>
         <Text style={s.dateText}>{isToday ? "Hoy: " : ""}{formatLongDate(date)}</Text>
@@ -109,7 +110,9 @@ const s = StyleSheet.create({
   screen: { flex: 1, backgroundColor: colors.background },
   pad: { paddingHorizontal: 16 },
   title: { fontSize: 28, color: colors.text, paddingHorizontal: 16, marginVertical: 12 },
-  search: { backgroundColor: colors.surface, borderWidth: 0 },
+  search: { backgroundColor: colors.surface, borderWidth: 0, paddingLeft: 40 },
+  searchRow: { justifyContent: "center" },
+  searchIcon: { position: "absolute", left: 30, zIndex: 1 },
   date: { flexDirection: "row", alignItems: "center", gap: 6, marginVertical: 12 },
   dateText: { fontSize: 18, color: colors.text, fontWeight: "600" },
   chips: { flexDirection: "row", gap: 8, marginBottom: 8 },

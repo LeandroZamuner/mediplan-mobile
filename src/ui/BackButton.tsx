@@ -10,4 +10,4 @@ export function BackButton({ onPress, onDark = true }: { onPress?: () => void; o
   );
 }
 
-const s = StyleSheet.create({ btn: { width: 36, height: 36, borderRadius: 10, alignItems: "center", justifyContent: "center", marginTop: 8 } });
+const s = StyleSheet.create({ btn: { width: 40, height: 40, borderRadius: 12, alignItems: "center", justifyContent: "center", marginTop: 8 } });

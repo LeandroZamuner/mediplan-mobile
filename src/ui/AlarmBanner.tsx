@@ -1,7 +1,8 @@
 import { Feather } from "@expo/vector-icons";
 import { router } from "expo-router";
 import { useCallback, useEffect, useState } from "react";
-import { AppState, Pressable, StyleSheet, Text } from "react-native";
+import { AppState, Pressable, StyleSheet } from "react-native";
+import { Text } from "@/ui/Text";
 import { alarmWarning, readAlarmStatus } from "@/notifications/permissions";
 import { radius } from "@/theme/tokens";
 

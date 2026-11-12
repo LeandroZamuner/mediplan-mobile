@@ -1,14 +1,15 @@
 import { router } from "expo-router";
 import { sendPasswordResetEmail } from "firebase/auth";
 import { useState } from "react";
-import { Modal, ScrollView, StyleSheet, Text, View } from "react-native";
+import { Modal, ScrollView, StyleSheet, View } from "react-native";
+import { Text } from "@/ui/Text";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useAuth } from "@/auth/AuthProvider";
 import { authErrorMessage } from "@/lib/auth-errors";
 import { firebaseAuth } from "@/lib/firebase";
 import { deleteAccount } from "@/lib/delete-account";
 import { colors } from "@/theme/tokens";
-import { BackButton } from "@/ui/BackButton";
+import { ScreenHeader } from "@/ui/ScreenHeader";
 import { Button } from "@/ui/Button";
 import { ConfirmModal } from "@/ui/ConfirmModal";
 import { Field } from "@/ui/Field";
@@ -52,8 +53,7 @@ export default function Privacidad() {
   return (
     <SafeAreaView style={s.screen}>
       <ScrollView contentContainerStyle={s.pad}>
-        <BackButton onDark={false} />
-        <Text style={s.title}>Privacidad y seguridad</Text>
+        <ScreenHeader title="Privacidad y seguridad" />
         <Text style={s.h2}>Contraseña</Text>
         <Text style={s.muted}>Para cambiarla te mandamos un enlace por correo.</Text>
         <Button title="Cambiar contraseña" variant="soft" loading={busy} onPress={() => void reset()} />

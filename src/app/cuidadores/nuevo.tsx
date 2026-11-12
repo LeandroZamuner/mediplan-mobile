@@ -1,6 +1,7 @@
 import { router } from "expo-router";
 import { useState } from "react";
-import { Share, StyleSheet, Text, View } from "react-native";
+import { Share, StyleSheet, View } from "react-native";
+import { Text } from "@/ui/Text";
 import { useSWRConfig } from "swr";
 import { useCaregivers, usePlans } from "@/features/usePlans";
 import { api } from "@/lib/api";
