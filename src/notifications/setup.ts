@@ -1,9 +1,9 @@
 import * as Notifications from "expo-notifications";
-import { AndroidImportance } from "expo-notifications";
+import { AndroidAudioContentType, AndroidAudioUsage, AndroidImportance, AndroidNotificationVisibility } from "expo-notifications";
 import { Platform } from "react-native";
-import { ACTION_SNOOZE, ACTION_TAKEN, DOSE_CATEGORY, DOSE_CHANNEL } from "./sync";
+import { ACTION_TAKEN, DOSE_CATEGORY, DOSE_CHANNEL, DOSE_CHANNEL_STRONG } from "./sync";
 
-/** Cómo se muestran las notificaciones con la app abierta + canal Android + botones "Tomé" / "Posponer". */
+/** Cómo se muestran las notificaciones con la app abierta + canales Android (Normal y Fuerte) + botón "Tomé". */
 export async function setupNotifications(): Promise<void> {
   try {
     await configure();
@@ -18,11 +18,19 @@ async function configure(): Promise<void> {
     handleNotification: async () => ({ shouldShowBanner: true, shouldShowList: true, shouldPlaySound: true, shouldSetBadge: false }),
   });
   if (Platform.OS === "android") {
-    await Notifications.setNotificationChannelAsync(DOSE_CHANNEL, { name: "Recordatorios de tomas", importance: AndroidImportance.HIGH });
+    await Notifications.setNotificationChannelAsync(DOSE_CHANNEL, { name: "Recordatorios de tomas (Normal)", importance: AndroidImportance.HIGH });
+    // Fuerte: suena por el volumen de ALARMA (también con el celular en vibrar), vibra fuerte y se ve en la pantalla bloqueada.
+    await Notifications.setNotificationChannelAsync(DOSE_CHANNEL_STRONG, {
+      name: "Recordatorios de tomas (Fuerte)",
+      importance: AndroidImportance.MAX,
+      sound: "default",
+      audioAttributes: { usage: AndroidAudioUsage.ALARM, contentType: AndroidAudioContentType.SONIFICATION },
+      vibrationPattern: [0, 600, 300, 600, 300, 900],
+      lockscreenVisibility: AndroidNotificationVisibility.PUBLIC,
+    });
   }
   await Notifications.setNotificationCategoryAsync(DOSE_CATEGORY, [
     { identifier: ACTION_TAKEN, buttonTitle: "Tomé", options: { opensAppToForeground: false } },
-    { identifier: ACTION_SNOOZE, buttonTitle: "Posponer", options: { opensAppToForeground: false } },
   ]);
 }
 

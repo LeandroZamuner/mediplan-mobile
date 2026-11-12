@@ -1,5 +1,6 @@
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { ApiError, api } from "./api";
+import { cancelDoseAlarms } from "@/notifications/dose-alarms";
 import { createPendingTakes, isNetworkError } from "./pending-takes";
 
 const KEY = "mediplan.pending-takes";
@@ -19,12 +20,15 @@ export async function flushPendingTakes(): Promise<number> {
 
 /** Registra una toma; si no hay internet, la guarda para enviarla después. */
 export async function recordTakenOrQueue(planId: string, medicationId: string, scheduledAt: string): Promise<"sent" | "queued"> {
+  const dose = { planId, medicationId, scheduledAt };
   try {
     await postTake(planId, medicationId, scheduledAt);
-    return "sent";
   } catch (e) {
     if (!isNetworkError(e, ApiError)) throw e;
-    await takesQueue.enqueue({ planId, medicationId, scheduledAt });
+    await takesQueue.enqueue(dose);
+    await cancelDoseAlarms(dose); // sin internet también: la persona ya la tomó, no hay que seguir insistiendo
     return "queued";
   }
+  await cancelDoseAlarms(dose); // se corta la insistencia de esta toma
+  return "sent";
 }
