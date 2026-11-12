@@ -10,6 +10,7 @@ import { api } from "@/lib/api";
 import { FREQUENCY_OPTIONS } from "@/lib/frequency";
 import { todayIn } from "@/lib/plans";
 import type { Plan } from "@/lib/types";
+import { askExactAlarmsOnce } from "@/notifications/permissions";
 import { refreshAlarms, saveReminderOffsets } from "@/notifications/reminders";
 import { colors, radius } from "@/theme/tokens";
 import { Button } from "@/ui/Button";
@@ -64,6 +65,7 @@ export default function NewPlan() {
       await saveReminderOffsets(offsets);
       const plans = await mutate<Plan[]>("/plans");
       if (plans) await refreshAlarms(plans, tz);
+      await askExactAlarmsOnce();
       router.back();
     } catch (err) {
       setError(err instanceof Error ? err.message : "No pudimos crear el plan.");

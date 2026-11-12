@@ -33,8 +33,8 @@ export default function Home() {
 
   // Al abrir la app (y cuando cambian los planes) se reprograman las alarmas locales.
   useEffect(() => {
-    if (plans.data) void refreshAlarms(plans.data, tz);
-  }, [plans.data, tz]);
+    if (plans.data) void refreshAlarms(plans.data, tz, doses.data ?? []);
+  }, [plans.data, doses.data, tz]);
 
   const planId = plans.data?.find((p) => p.status === "active")?.id;
   const caregivers = useCaregivers(planId);

@@ -11,6 +11,8 @@ export type DoseTrigger = {
   at: Date;
   /** Hora real de la toma. */
   scheduledAt: Date;
+  /** 0 = alarma original; 1, 2, … = repeticiones mientras no se registre la toma. */
+  repeat: number;
 };
 
 function parts(date: Date, tz: string) {
@@ -89,6 +91,7 @@ export function planDoseTriggers(
             body: med.dose,
             at,
             scheduledAt,
+            repeat: 0,
           });
         }
       }

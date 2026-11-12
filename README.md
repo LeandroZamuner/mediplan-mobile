@@ -13,6 +13,16 @@ Lo que le toca a la app, según los requerimientos:
 
 Repos relacionados: [`mediplan-api`](../mediplan-api) y [`mediplan-web`](../mediplan-web).
 
+## Alarmas
+
+- Las tomas suenan como **notificaciones locales** (sin internet). Dos niveles a elegir en Perfil → Configurar notificaciones:
+  **Normal** (notificación común) y **Fuerte** (canal de alarma: suena por el volumen de alarma, vibra fuerte, se ve en la pantalla
+  bloqueada y no se descarta deslizando).
+- Si no se marca "Tomé", la alarma **se repite cada 5 minutos hasta 30 minutos**; al registrar la toma (en la app, desde la
+  notificación o desde otro dispositivo) se cancelan las repeticiones. A los 30 minutos la API avisa a los cuidadores.
+- Hay un tope de 200 alarmas programadas (Android limita a 500 por app).
+- Se prueba solo en la *development build*: Expo Go no crea los canales de notificación.
+
 ## Estado
 
 - Hecho: base del proyecto, login con Firebase (pantalla provisoria), cliente de la API, y la lógica de **alarmas locales**

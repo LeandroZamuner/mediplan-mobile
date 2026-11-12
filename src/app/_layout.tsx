@@ -12,7 +12,6 @@ import { Text } from "@/ui/Text";
 import * as Notifications from "expo-notifications";
 import { recordTaken } from "@/lib/doses";
 import { handleDoseAction } from "@/notifications/respond";
-import { DOSE_CATEGORY, DOSE_CHANNEL } from "@/notifications/sync";
 import { setupNotifications } from "@/notifications/setup";
 import { flushPendingTakes } from "@/lib/takes-queue";
 import { useSWRConfig } from "swr";
@@ -76,18 +75,9 @@ export default function RootLayout() {
   useEffect(() => {
     void setupNotifications();
     const sub = Notifications.addNotificationResponseReceivedListener((r) => {
-      const { title, body, data } = r.notification.request.content;
+      const { data } = r.notification.request.content;
       const action = r.actionIdentifier === Notifications.DEFAULT_ACTION_IDENTIFIER ? "default" : r.actionIdentifier;
-      void handleDoseAction(action, data ?? {}, { title, body }, {
-        recordTaken,
-        openList: () => router.push("/recordatorios"),
-        now: () => new Date(),
-        scheduleAt: (date, content, d) =>
-          Notifications.scheduleNotificationAsync({
-            content: { title: content.title ?? "", body: content.body ?? "", categoryIdentifier: DOSE_CATEGORY, data: d },
-            trigger: { type: Notifications.SchedulableTriggerInputTypes.DATE, date, channelId: DOSE_CHANNEL, delivery: "alarmClock" },
-          }),
-      });
+      void handleDoseAction(action, data ?? {}, { recordTaken, openList: () => router.push("/recordatorios") });
     });
     return () => sub.remove();
   }, []);
