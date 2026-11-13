@@ -49,7 +49,7 @@ describe("handleAlarmEvent", () => {
     for (const id of ["open", "alarm"]) {
       const d = deps();
       await handleAlarmEvent(event(EventType.PRESS, id), d);
-      expect(d.openAlarm).toHaveBeenCalledWith({ planId: "p1", medicationId: "m1", scheduledAt: "2026-11-13T23:15:00.000Z", title: "Paracetamol 500", body: "1 comprimido" });
+      expect(d.openAlarm).toHaveBeenCalledWith({ planId: "p1", medicationId: "m1", scheduledAt: "2026-11-13T23:15:00.000Z", title: "Paracetamol 500", body: "1 comprimido", dose: "1 comprimido", repeat: 0 });
     }
   });
 
@@ -96,7 +96,7 @@ describe("alarma de prueba", () => {
 });
 
 describe("takeFromAlarm", () => {
-  const info = { planId: "p1", medicationId: "m1", scheduledAt: "2026-11-13T23:15:00.000Z", title: "t", body: "b" };
+  const info = { planId: "p1", medicationId: "m1", scheduledAt: "2026-11-13T23:15:00.000Z", title: "t", body: "b", dose: "d", repeat: 0 };
   it("registra la toma real", async () => {
     const recordTaken = jest.fn().mockResolvedValue("sent");
     await takeFromAlarm(info, recordTaken);
@@ -117,7 +117,12 @@ describe("pickDisplayedAlarm", () => {
   });
 
   it("dada una alarma sonando, cuando la app vuelve a primer plano, entonces devuelve sus datos para mostrar la pantalla de alarma", () => {
-    expect(pickDisplayedAlarm([shown("n1", 100)] as never)).toEqual({ planId: "p1", medicationId: "m1", scheduledAt: "2026-11-13T23:15:00.000Z", title: "Paracetamol 500", body: "1 comprimido" });
+    expect(pickDisplayedAlarm([shown("n1", 100)] as never)).toEqual({ planId: "p1", medicationId: "m1", scheduledAt: "2026-11-13T23:15:00.000Z", title: "Paracetamol 500", body: "1 comprimido", dose: "1 comprimido", repeat: 0 });
+  });
+
+  it("dada una repetición, cuando se muestra la pantalla de alarma, entonces trae la dosis sola y el número de repetición", () => {
+    const got = pickDisplayedAlarm([shown("n2", 100, { dose: "500 mg", repeat: "2" })] as never);
+    expect(got).toMatchObject({ dose: "500 mg", repeat: 2 });
   });
 
   it("dadas varias alarmas sonando, entonces elige la más reciente", () => {

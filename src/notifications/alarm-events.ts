@@ -1,7 +1,7 @@
 import { EventType, type DisplayedNotification, type Event } from "react-native-notify-kit";
 import { ACTION_FULL_SCREEN, ACTION_OPEN, ACTION_SNOOZE, ACTION_TAKEN, TEST_PLAN_ID } from "./native-alarm";
 
-export type AlarmInfo = { planId: string; medicationId: string; scheduledAt: string; title: string; body: string };
+export type AlarmInfo = { planId: string; medicationId: string; scheduledAt: string; title: string; body: string; /** Solo la dosis. */ dose: string; /** 0 = la alarma original; 1, 2… = repeticiones. */ repeat: number };
 
 export type AlarmDeps = {
   /** Registra la toma (y, al hacerlo, se cancelan sus alarmas). */
@@ -24,7 +24,12 @@ function read(event: Event): { id?: string; info: AlarmInfo } | null {
   const n = event.detail?.notification;
   const d = n?.data as Record<string, unknown> | undefined;
   if (!n || typeof d?.planId !== "string" || typeof d.medicationId !== "string" || typeof d.scheduledAt !== "string") return null;
-  return { id: n.id, info: { planId: d.planId, medicationId: d.medicationId, scheduledAt: d.scheduledAt, title: n.title ?? "", body: n.body ?? "" } };
+  const body = n.body ?? "";
+  const repeat = Number(d.repeat);
+  return {
+    id: n.id,
+    info: { planId: d.planId, medicationId: d.medicationId, scheduledAt: d.scheduledAt, title: n.title ?? "", body, dose: typeof d.dose === "string" ? d.dose : body, repeat: Number.isFinite(repeat) ? repeat : 0 },
+  };
 }
 
 /** Qué hacer cuando la persona toca la alarma Fuerte, sus botones, o cuando llega con la app abierta. */

@@ -7,6 +7,8 @@ export type DoseTrigger = {
   medicationId: string;
   title: string;
   body: string;
+  /** Solo la dosis (el cuerpo de las repeticiones agrega un aviso). */
+  dose?: string;
   /** Cuándo suena la alarma (la toma menos la anticipación del recordatorio). */
   at: Date;
   /** Hora real de la toma. */
@@ -89,6 +91,7 @@ export function planDoseTriggers(
             medicationId: med.id,
             title: med.name,
             body: med.dose,
+            dose: med.dose,
             at,
             scheduledAt,
             repeat: 0,

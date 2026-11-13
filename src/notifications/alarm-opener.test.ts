@@ -1,6 +1,6 @@
 import { createAlarmOpener } from "./alarm-opener";
 
-const info = (over: Partial<{ scheduledAt: string }> = {}) => ({ planId: "p1", medicationId: "m1", scheduledAt: "2026-11-13T23:15:00.000Z", title: "Paracetamol", body: "1", ...over });
+const info = (over: Partial<{ scheduledAt: string }> = {}) => ({ planId: "p1", medicationId: "m1", scheduledAt: "2026-11-13T23:15:00.000Z", title: "Paracetamol", body: "1", dose: "1", repeat: 0, ...over });
 
 describe("createAlarmOpener", () => {
   it("dada una alarma, cuando se pide abrir su pantalla, entonces se abre", () => {

@@ -14,7 +14,7 @@ import { Text } from "@/ui/Text";
 
 /** Pantalla completa de la alarma Fuerte: se abre sobre el bloqueo con el medicamento y los botones grandes. */
 export default function Alarma() {
-  const p = useLocalSearchParams<{ planId: string; medicationId: string; scheduledAt: string; title: string; body: string }>();
+  const p = useLocalSearchParams<{ planId: string; medicationId: string; scheduledAt: string; title: string; body: string; dose?: string; repeat?: string }>();
   const { me } = useAuth();
   const tz = me?.timezone ?? "America/Argentina/Buenos_Aires";
   const [busy, setBusy] = useState(false);
@@ -27,7 +27,7 @@ export default function Alarma() {
     setBusy(true);
     setError("");
     try {
-      await takeFromAlarm({ ...dose, title: p.title, body: p.body }, recordTaken); // al registrarla se apaga la alarma y sus repeticiones
+      await takeFromAlarm({ ...dose, title: p.title, body: p.body, dose: p.dose ?? p.body, repeat: Number(p.repeat ?? 0) }, recordTaken); // al registrarla se apaga la alarma y sus repeticiones
       await silenceNativeDose(dose);
       goHome();
     } catch (e) {
@@ -48,8 +48,9 @@ export default function Alarma() {
       </View>
       <Text style={s.small}>Hora de tu medicación</Text>
       <Text style={s.title}>{p.title}</Text>
-      {p.body ? <Text style={s.dose}>{p.body}</Text> : null}
+      {p.dose || p.body ? <Text style={s.dose}>{p.dose ?? p.body}</Text> : null}
       {p.scheduledAt ? <Text style={s.small}>Programada para las {formatTime(p.scheduledAt, tz)}</Text> : null}
+      {Number(p.repeat ?? 0) > 0 ? <Text style={s.again}>Todavía no registraste esta toma.</Text> : null}
       {error ? <Text style={s.error}>{error}</Text> : null}
       <View style={s.actions}>
         <Button title="Tomé" variant="soft" loading={busy} onPress={() => void taken()} />
@@ -68,6 +69,7 @@ const s = StyleSheet.create({
   title: { ...type.title, color: "#fff", textAlign: "center" },
   dose: { ...type.h2, color: "#fff", textAlign: "center" },
   small: { ...type.body, color: "#C9CDEB", textAlign: "center" },
+  again: { ...type.body, color: "#FFD1D8", textAlign: "center", marginTop: 4 },
   error: { ...type.body, color: "#FFD1D8", textAlign: "center" },
   actions: { alignSelf: "stretch", gap: 12, marginTop: 28 },
   later: { height: 48, alignItems: "center", justifyContent: "center" },

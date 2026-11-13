@@ -23,7 +23,7 @@ export function buildAlarmNotification(t: DoseTrigger): Notification {
     id: t.key,
     title: t.title,
     body: t.body,
-    data: { planId: t.planId, medicationId: t.medicationId, scheduledAt: t.scheduledAt.toISOString(), repeat: String(t.repeat) },
+    data: { planId: t.planId, medicationId: t.medicationId, scheduledAt: t.scheduledAt.toISOString(), dose: t.dose ?? t.body, repeat: String(t.repeat) },
     android: {
       channelId: CHANNEL_STRONG,
       category: AndroidCategory.ALARM,

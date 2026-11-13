@@ -51,8 +51,14 @@ describe("buildAlarmNotification", () => {
       planId: "p1",
       medicationId: "m1",
       scheduledAt: "2026-11-13T23:15:00.000Z",
+      dose: "1 comprimido",
       repeat: "2",
     });
+  });
+
+  it("dada una repetición cuyo texto agrega un aviso, cuando se arma la alarma, entonces la dosis viaja aparte, sin ese aviso", () => {
+    const rep = trigger({ repeat: 1, dose: "500 mg", body: "500 mg · Todavía no registraste esta toma" });
+    expect(buildAlarmNotification(rep).data).toMatchObject({ dose: "500 mg", repeat: "1" });
   });
 });
 
