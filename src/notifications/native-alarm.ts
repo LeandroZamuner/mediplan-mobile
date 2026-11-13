@@ -91,3 +91,8 @@ export async function silenceNativeDose(dose: DoseRef): Promise<void> {
     console.warn("[mediplan] no se pudo apagar la alarma:", e);
   }
 }
+
+/** Cuántas alarmas nativas hay programadas en el sistema (Android puede haberlas borrado). */
+export async function countNativeAlarms(): Promise<number> {
+  return (await notifee.getTriggerNotificationIds()).length;
+}

@@ -1,4 +1,4 @@
-import { EventType, type Event } from "react-native-notify-kit";
+import { EventType, type DisplayedNotification, type Event } from "react-native-notify-kit";
 import { ACTION_FULL_SCREEN, ACTION_OPEN, ACTION_SNOOZE, ACTION_TAKEN, TEST_PLAN_ID } from "./native-alarm";
 
 export type AlarmInfo = { planId: string; medicationId: string; scheduledAt: string; title: string; body: string };
@@ -51,4 +51,16 @@ export async function handleAlarmEvent(event: Event, deps: AlarmDeps): Promise<v
     // Si falló registrar la toma, la alarma sigue sonando para que se pueda reintentar.
     console.warn("[mediplan] no se pudo atender la alarma:", e);
   }
+}
+
+/**
+ * Alarma que está sonando ahora (la más reciente). Cuando Android abre la app desde la pantalla completa no llega ningún evento
+ * en un arranque en caliente: al volver a primer plano se mira qué alarma hay en la barra y se muestra su pantalla.
+ */
+export function pickDisplayedAlarm(displayed: DisplayedNotification[]): AlarmInfo | null {
+  const dated = displayed
+    .map((n) => ({ info: read({ type: EventType.UNKNOWN, detail: { notification: n.notification } } as Event)?.info, date: n.date ?? 0 }))
+    .filter((x): x is { info: AlarmInfo; date: number } => !!x.info);
+  if (!dated.length) return null;
+  return dated.reduce((a, b) => (b.date >= a.date ? b : a)).info;
 }

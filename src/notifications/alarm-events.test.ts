@@ -1,5 +1,5 @@
 import { EventType, type Event } from "react-native-notify-kit";
-import { handleAlarmEvent, takeFromAlarm, type AlarmDeps } from "./alarm-events";
+import { handleAlarmEvent, pickDisplayedAlarm, takeFromAlarm, type AlarmDeps } from "./alarm-events";
 import { TEST_PLAN_ID } from "./native-alarm";
 
 const data = { planId: "p1", medicationId: "m1", scheduledAt: "2026-11-13T23:15:00.000Z", repeat: "0" };
@@ -107,4 +107,29 @@ describe("takeFromAlarm", () => {
     await takeFromAlarm({ ...info, planId: TEST_PLAN_ID }, recordTaken);
     expect(recordTaken).not.toHaveBeenCalled();
   });
+});
+
+describe("pickDisplayedAlarm", () => {
+  const shown = (id: string, date: number, over: Record<string, unknown> = {}) => ({
+    id,
+    date,
+    notification: { id, title: "Paracetamol 500", body: "1 comprimido", data: { ...data, ...over } },
+  });
+
+  it("dada una alarma sonando, cuando la app vuelve a primer plano, entonces devuelve sus datos para mostrar la pantalla de alarma", () => {
+    expect(pickDisplayedAlarm([shown("n1", 100)] as never)).toEqual({ planId: "p1", medicationId: "m1", scheduledAt: "2026-11-13T23:15:00.000Z", title: "Paracetamol 500", body: "1 comprimido" });
+  });
+
+  it("dadas varias alarmas sonando, entonces elige la más reciente", () => {
+    const got = pickDisplayedAlarm([shown("viejo", 100, { medicationId: "m1" }), shown("nuevo", 900, { medicationId: "m2" })] as never);
+    expect(got?.medicationId).toBe("m2");
+  });
+
+  it("dadas notificaciones que no son de una toma, entonces las ignora", () => {
+    const otra = { id: "x", date: 999, notification: { id: "x", title: "Otra", data: { foo: "bar" } } };
+    expect(pickDisplayedAlarm([otra, shown("n1", 100)] as never)?.planId).toBe("p1");
+    expect(pickDisplayedAlarm([otra] as never)).toBeNull();
+  });
+
+  it("dado que no hay nada sonando, entonces devuelve null", () => expect(pickDisplayedAlarm([])).toBeNull());
 });

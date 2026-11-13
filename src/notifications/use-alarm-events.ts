@@ -1,9 +1,9 @@
 import { router } from "expo-router";
 import { useEffect } from "react";
-import { Platform } from "react-native";
+import { AppState, Platform } from "react-native";
 import notifee, { EventType, type Event } from "react-native-notify-kit";
 import { recordTaken } from "@/lib/doses";
-import { handleAlarmEvent, type AlarmDeps } from "./alarm-events";
+import { handleAlarmEvent, pickDisplayedAlarm, type AlarmDeps } from "./alarm-events";
 import { createAlarmOpener } from "./alarm-opener";
 import { ACTION_OPEN } from "./native-alarm";
 
@@ -25,7 +25,21 @@ export function useAlarmEvents(enabled: boolean) {
           if (initial) void handleAlarmEvent({ type: EventType.PRESS, detail: { notification: initial.notification, pressAction: { id: ACTION_OPEN } } } as Event, deps);
         })
         .catch(() => undefined);
-      return unsubscribe;
+      // Arranque en caliente desde la pantalla completa: no llega ningún evento, así que al volver a primer plano se mira si hay una alarma sonando.
+      const showRinging = () =>
+        void notifee
+          .getDisplayedNotifications()
+          .then((shown) => {
+            const ringing = pickDisplayedAlarm(shown);
+            if (ringing) openAlarm(ringing);
+          })
+          .catch(() => undefined);
+      showRinging();
+      const appState = AppState.addEventListener("change", (s) => s === "active" && showRinging());
+      return () => {
+        unsubscribe();
+        appState.remove();
+      };
     } catch (e) {
       console.warn("[mediplan] eventos de alarma no disponibles (¿Expo Go?):", e);
     }
