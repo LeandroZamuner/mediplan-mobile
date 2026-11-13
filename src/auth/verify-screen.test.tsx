@@ -1,6 +1,6 @@
 import { fireEvent, render, screen, waitFor, act } from "@testing-library/react-native";
 import { AppState } from "react-native";
-import Verify from "./verify";
+import Verify from "@/app/verify";
 
 const mockRecheck = jest.fn();
 jest.mock("@/auth/AuthProvider", () => ({ useAuth: () => ({ firebaseUser: { email: "a@b.com" }, recheck: mockRecheck, signOut: jest.fn() }) }));
