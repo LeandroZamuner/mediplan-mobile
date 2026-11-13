@@ -1,8 +1,10 @@
 import { Feather } from "@expo/vector-icons";
 import { Tabs } from "expo-router";
 import type { ComponentProps } from "react";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { unreadCount, useNotifications } from "@/features/useNotifications";
 import { useInvitations, usePlans, useSupervised } from "@/features/usePlans";
+import { tabBarMetrics } from "@/features/tab-bar";
 import { visibleTabs, type TabName } from "@/features/tabs";
 import { colors } from "@/theme/tokens";
 
@@ -18,6 +20,7 @@ const TABS: Record<TabName, { title: string; icon: Icon }> = {
 const ALL = Object.keys(TABS) as TabName[];
 
 export default function TabsLayout() {
+  const insets = useSafeAreaInsets();
   const plans = usePlans();
   const supervised = useSupervised();
   const invitations = useInvitations();
@@ -36,7 +39,7 @@ export default function TabsLayout() {
         tabBarActiveTintColor: colors.primary,
         tabBarInactiveTintColor: colors.textMuted,
         tabBarLabelStyle: { fontSize: 11, fontFamily: "Inter_500Medium" },
-        tabBarStyle: { backgroundColor: colors.background, borderTopWidth: 0, elevation: 8, height: 64, paddingBottom: 8 },
+        tabBarStyle: { backgroundColor: colors.background, borderTopWidth: 0, elevation: 8, ...tabBarMetrics(insets.bottom) },
       }}
     >
       {ALL.map((name) => (

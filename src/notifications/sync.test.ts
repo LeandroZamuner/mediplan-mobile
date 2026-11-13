@@ -46,7 +46,7 @@ describe("syncDoseAlarms", () => {
         autoDismiss: true,
         data: { planId: "p1", medicationId: "m1", scheduledAt: "2026-11-11T11:00:00.000Z" },
       },
-      trigger: { type: "date", date: new Date("2026-11-11T11:00:00.000Z"), channelId: "doses", delivery: "alarmClock" },
+      trigger: { type: "date", date: new Date("2026-11-11T11:00:00.000Z"), channelId: "doses_v2", delivery: "alarmClock" },
     });
     expect(calls.map((c) => c.trigger.date.toISOString())).toEqual(["11:00", "11:05", "11:10", "11:15", "11:20", "11:25", "11:30"].map((h) => `2026-11-11T${h}:00.000Z`));
     expect(calls[1].content.body).toMatch(/todavía no registraste/i);
@@ -55,7 +55,7 @@ describe("syncDoseAlarms", () => {
   it("en nivel Fuerte usa el canal de alarma y la notificación no se descarta deslizando", async () => {
     await syncDoseAlarms(plans, "America/Argentina/Buenos_Aires", new Date("2026-11-10T13:00:00Z"), {}, "fuerte");
     const first = (Notifications.scheduleNotificationAsync as jest.Mock).mock.calls[0][0];
-    expect(first.trigger.channelId).toBe("doses_strong");
+    expect(first.trigger.channelId).toBe("doses_strong_v2");
     expect(first.content.sticky).toBe(true);
     expect(first.content.autoDismiss).toBe(false);
   });

@@ -16,10 +16,13 @@ Repos relacionados: [`mediplan-api`](../mediplan-api) y [`mediplan-web`](../medi
 ## Alarmas
 
 - Las tomas suenan como **notificaciones locales** (sin internet). Dos niveles a elegir en Perfil → Configurar notificaciones:
-  **Normal** (notificación común) y **Fuerte** (canal de alarma: suena por el volumen de alarma, vibra fuerte, se ve en la pantalla
-  bloqueada y no se descarta deslizando).
+  **Normal** (campanita de ~8 s por el volumen de notificaciones) y **Fuerte** (pitidos de ~28 s por el volumen de *alarma*: suena
+  aunque el celular esté en vibrar o con No molestar, vibra fuerte, se ve en la pantalla bloqueada y no se descarta deslizando).
+  Los sonidos son archivos propios en `assets/sounds` (el sonido por defecto de Android dura ~1 s y por eso casi no se oía).
+- Android **no permite modificar un canal ya creado**: si se cambia el sonido o la importancia hay que usar un id nuevo
+  (`src/notifications/channels.ts`, sufijo `_v2`) y borrar el anterior.
 - Si no se marca "Tomé", la alarma **se repite cada 5 minutos hasta 30 minutos**; al registrar la toma (en la app, desde la
-  notificación o desde otro dispositivo) se cancelan las repeticiones. A los 30 minutos la API avisa a los cuidadores.
+  notificación o desde otro dispositivo) se cancelan las repeticiones. A los 30 minutos la API marca la toma como omitida y avisa a la paciente (pantalla Avisos) y a los cuidadores.
 - Hay un tope de 200 alarmas programadas (Android limita a 500 por app).
 - Se prueba solo en la *development build*: Expo Go no crea los canales de notificación.
 
