@@ -22,12 +22,9 @@ export async function saveReminderOffsets(patch: Record<string, number>): Promis
   await AsyncStorage.setItem(KEY, JSON.stringify(all)).catch(() => {});
 }
 
-/**
- * Reprograma las alarmas locales con los planes actuales, el nivel elegido (Normal o Fuerte) y las tomas ya registradas
- * (para no insistir con una toma que ya se tomó, aunque se haya marcado en otro dispositivo o en la web).
- * No hace nada si no hay permiso.
- */
-export async function refreshAlarms(plans: Plan[], tz: string, doses: { medicationId: string; scheduledAt: string; status: string }[] = []): Promise<void> {
+type Args = { plans: Plan[]; tz: string; doses: { medicationId: string; scheduledAt: string; status: string }[] };
+
+async function reprogram({ plans, tz, doses }: Args): Promise<void> {
   if (!(await ensureNotificationPermission())) return;
   const previous = await AsyncStorage.getItem(SIGNATURE_KEY).catch(() => null);
   const { signature } = await syncDoseAlarmsIfChanged(plans, tz, new Date(), {
@@ -37,4 +34,39 @@ export async function refreshAlarms(plans: Plan[], tz: string, doses: { medicati
     previousSignature: previous,
   });
   await AsyncStorage.setItem(SIGNATURE_KEY, signature).catch(() => {});
+}
+
+let running = false;
+let pending: Args | null = null;
+let waiters: (() => void)[] = [];
+
+/**
+ * Reprograma las alarmas locales con los planes actuales, el nivel elegido (Normal o Fuerte) y las tomas ya registradas
+ * (para no insistir con una toma que ya se tomó, aunque se haya marcado en otro dispositivo o en la web).
+ * No hace nada si no hay permiso.
+ *
+ * De a una por vez: programar tarda, y dos reprogramaciones en paralelo hacían que las alarmas de la primera (por ejemplo, de una
+ * toma ya registrada) se agregaran después de que la segunda limpiara todo. Si llegan pedidos mientras una corre, se hace solo el
+ * último, que tiene los datos más nuevos.
+ */
+export async function refreshAlarms(plans: Plan[], tz: string, doses: Args["doses"] = []): Promise<void> {
+  pending = { plans, tz, doses };
+  if (running) return new Promise<void>((resolve) => waiters.push(resolve));
+  running = true;
+  try {
+    while (pending) {
+      const args = pending;
+      pending = null;
+      try {
+        await reprogram(args);
+      } catch (e) {
+        console.warn("[mediplan] no se pudieron reprogramar las alarmas:", e);
+      }
+    }
+  } finally {
+    running = false;
+    const done = waiters;
+    waiters = [];
+    done.forEach((resolve) => resolve());
+  }
 }

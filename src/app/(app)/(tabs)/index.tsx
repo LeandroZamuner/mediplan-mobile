@@ -31,10 +31,12 @@ export default function Home() {
   const [dismissed, setDismissed] = useState(false);
   const [toast, setToast] = useState("");
 
-  // Al abrir la app (y cuando cambian los planes) se reprograman las alarmas locales.
+  // Al abrir la app (y cuando cambian los planes) se reprograman las alarmas locales, ya sabiendo qué tomas están registradas
+  // (si no, se programarían alarmas de tomas ya tomadas). Sin internet las tomas salen de la copia guardada.
+  const dosesKnown = doses.data !== undefined || !!doses.error;
   useEffect(() => {
-    if (plans.data) void refreshAlarms(plans.data, tz, doses.data ?? []);
-  }, [plans.data, doses.data, tz]);
+    if (plans.data && dosesKnown) void refreshAlarms(plans.data, tz, doses.data ?? []);
+  }, [plans.data, doses.data, dosesKnown, tz]);
 
   const planId = plans.data?.find((p) => p.status === "active")?.id;
   const caregivers = useCaregivers(planId);

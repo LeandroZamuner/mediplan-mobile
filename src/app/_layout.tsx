@@ -13,6 +13,7 @@ import * as Notifications from "expo-notifications";
 import { recordTaken } from "@/lib/doses";
 import { handleDoseAction } from "@/notifications/respond";
 import { setupNotifications } from "@/notifications/setup";
+import { useAlarmEvents } from "@/notifications/use-alarm-events";
 import { flushPendingTakes } from "@/lib/takes-queue";
 import { useSWRConfig } from "swr";
 
@@ -33,6 +34,8 @@ function Routes() {
     const sub = AppState.addEventListener("change", (s) => s === "active" && run());
     return () => sub.remove();
   }, [status, mutate]);
+  // Alarma Fuerte: pantalla completa y botones con la app abierta (con la app cerrada los atiende background.ts).
+  useAlarmEvents(status === "ready" && !!onboarded);
   const ready = status !== "loading" && !(status === "ready" && onboarded === null);
   useEffect(() => {
     if (ready) SplashScreen.hide();
@@ -65,6 +68,7 @@ function Routes() {
       <Stack.Protected guard={status === "ready"}>
         <Stack.Screen name="plan/nuevo" options={{ presentation: "modal" }} />
         <Stack.Screen name="cuidadores/nuevo" options={{ presentation: "modal" }} />
+        <Stack.Screen name="alarma" options={{ presentation: "fullScreenModal", animation: "fade", gestureEnabled: false }} />
       </Stack.Protected>
     </Stack>
   );

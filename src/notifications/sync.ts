@@ -1,6 +1,8 @@
 import * as Notifications from "expo-notifications";
+import { Platform } from "react-native";
 import type { Plan } from "@/lib/types";
-import { alarmProfile, capTriggers, DEFAULT_LEVEL, excludeTaken, expandRepeats, MAX_SCHEDULED, type AlarmLevel } from "./repeats";
+import { alarmProfile, capTriggers, DEFAULT_LEVEL, excludeTaken, expandRepeats, MAX_SCHEDULED, REPEAT_UNTIL_MIN, type AlarmLevel } from "./repeats";
+import { cancelAllNativeAlarms, countNativeAlarms, scheduleNativeAlarms } from "./native-alarm";
 import { planDoseTriggers, type DoseTrigger } from "./schedule";
 
 export const DOSE_CATEGORY = "dose";
@@ -11,7 +13,10 @@ export const HORIZON_DAYS = 7;
 
 /** Todo lo que suena: alarma original + repeticiones, sin las tomas ya registradas y con tope de cantidad. */
 function buildTriggers(plans: Plan[], tz: string, now: Date, offsets: Record<string, number>, level: AlarmLevel, taken: Set<string>): DoseTrigger[] {
-  const base = excludeTaken(planDoseTriggers(plans, tz, now, HORIZON_DAYS, offsets), taken);
+  // Las tomas que sonaron hace menos de 30 min siguen en su ventana de repeticiones: se parte de ellas y expandRepeats se queda solo
+  // con lo que aún no pasó (si no, abrir la app después de la hora de la toma borraba las repeticiones que faltaban).
+  const windowStart = new Date(now.getTime() - REPEAT_UNTIL_MIN * 60_000);
+  const base = excludeTaken(planDoseTriggers(plans, tz, windowStart, HORIZON_DAYS, offsets), taken);
   return capTriggers(expandRepeats(base, now, { enabled: alarmProfile(level).repeats }), MAX_SCHEDULED);
 }
 
@@ -37,13 +42,38 @@ export async function syncDoseAlarmsIfChanged(plans: Plan[], tz: string, now: Da
   const level = opts.level ?? DEFAULT_LEVEL;
   const triggers = buildTriggers(plans, tz, now, opts.offsets ?? {}, level, opts.taken ?? new Set());
   const signature = alarmSignature(triggers, level);
-  if (opts.previousSignature !== null && signature === opts.previousSignature) return { changed: false, signature };
+  // Misma firma no alcanza: Android borra las alarmas si se fuerza la detención de la app o limpia la memoria.
+  if (opts.previousSignature !== null && signature === opts.previousSignature && (await scheduledCount(level)) === triggers.length) return { changed: false, signature };
   await replaceAlarms(triggers, level);
   return { changed: true, signature };
 }
 
+/** Fuerte en Android = alarma nativa (sonido en bucle y pantalla completa); lo demás, notificaciones comunes. */
+const isNativeAlarm = (level: AlarmLevel) => level === "fuerte" && Platform.OS === "android";
+
+/** Cuántas alarmas tiene programadas el sistema ahora; -1 si no se puede saber (entonces se reprograma por las dudas). */
+async function scheduledCount(level: AlarmLevel): Promise<number> {
+  try {
+    return isNativeAlarm(level) ? await countNativeAlarms() : (await Notifications.getAllScheduledNotificationsAsync()).length;
+  } catch {
+    return -1;
+  }
+}
+
 async function replaceAlarms(triggers: DoseTrigger[], level: AlarmLevel): Promise<number> {
+  // Se borran las de los dos tipos: la persona pudo haber cambiado de nivel.
   await Notifications.cancelAllScheduledNotificationsAsync();
+  await cancelAllNativeAlarms();
+  if (isNativeAlarm(level)) {
+    try {
+      await scheduleNativeAlarms(triggers);
+      return triggers.length;
+    } catch (e) {
+      // Sin la librería nativa (p. ej. Expo Go) igual suena, como notificación común.
+      console.warn("[mediplan] no se pudieron programar las alarmas nativas, se usan notificaciones comunes:", e);
+      await cancelAllNativeAlarms();
+    }
+  }
   // En tandas de 10 en paralelo: programarlas una por una tarda varios segundos.
   for (let i = 0; i < triggers.length; i += 10) {
     await Promise.all(triggers.slice(i, i + 10).map((t) => schedule(t, level)));

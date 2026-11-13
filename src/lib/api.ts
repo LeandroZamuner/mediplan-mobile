@@ -16,7 +16,10 @@ type Options = Omit<RequestInit, "body"> & { json?: unknown };
 /** Llama a la API de MediPlan con el token de la sesión de Firebase. Las rutas empiezan con "/" (sin /api/v1). */
 export async function api<T>(path: string, { json, ...init }: Options = {}): Promise<T> {
   const headers = new Headers(init.headers);
-  const user = firebaseAuth().currentUser;
+  // La sesión se restaura de forma asíncrona: si la app se abrió desde una alarma, hay que esperarla antes de pedir el token.
+  const auth = firebaseAuth();
+  await auth.authStateReady();
+  const user = auth.currentUser;
   if (user) headers.set("Authorization", `Bearer ${await user.getIdToken()}`);
   let body: string | undefined;
   if (json !== undefined) {
