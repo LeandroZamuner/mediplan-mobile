@@ -22,7 +22,8 @@
         "POST_NOTIFICATIONS",
         "SCHEDULE_EXACT_ALARM",
         "RECEIVE_BOOT_COMPLETED",
-        "VIBRATE"
+        "VIBRATE",
+        "USE_FULL_SCREEN_INTENT"
       ]
     },
     "web": {
@@ -49,7 +50,9 @@
           "imageWidth": 200,
           "resizeMode": "contain"
         }
-      ]
+      ],
+      "react-native-notify-kit",
+      "./plugins/with-alarm-activity"
     ],
     "scheme": "mediplan",
     "extra": {

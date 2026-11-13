@@ -7,7 +7,7 @@ import { useAuth } from "@/auth/AuthProvider";
 import { usePlans } from "@/features/usePlans";
 import { useTodayDoses } from "@/lib/doses";
 import { loadAlarmLevel, saveAlarmLevel } from "@/notifications/alarm-level";
-import { alarmWarning, readAlarmStatus, requestExactAlarms, scheduleTestNotification, type AlarmStatus } from "@/notifications/permissions";
+import { alarmWarning, openFullScreenSettings, readAlarmStatus, requestExactAlarms, scheduleTestNotification, type AlarmStatus } from "@/notifications/permissions";
 import { refreshAlarms } from "@/notifications/reminders";
 import { REPEAT_EVERY_MIN, REPEAT_UNTIL_MIN, type AlarmLevel } from "@/notifications/repeats";
 import { colors, radius } from "@/theme/tokens";
@@ -19,7 +19,7 @@ import { Text } from "@/ui/Text";
 
 const LEVELS: { key: AlarmLevel; title: string; text: string; icon: "bell" | "volume-2" }[] = [
   { key: "normal", title: "Normal", icon: "bell", text: `Notificación común. Si no marcás “Tomé”, se repite cada ${REPEAT_EVERY_MIN} minutos durante ${REPEAT_UNTIL_MIN} minutos.` },
-  { key: "fuerte", title: "Fuerte", icon: "volume-2", text: `Suena como una alarma, también con el celular en vibrar, y no se descarta deslizando. Se repite cada ${REPEAT_EVERY_MIN} minutos durante ${REPEAT_UNTIL_MIN} minutos o hasta que marques “Tomé”.` },
+  { key: "fuerte", title: "Fuerte", icon: "volume-2", text: `Suena como una alarma de verdad, también con el celular en vibrar, hasta que la atiendas. Se abre en pantalla completa aunque el celular esté bloqueado, con los botones “Tomé” y “Posponer”. Si no la registrás, vuelve a sonar cada ${REPEAT_EVERY_MIN} minutos durante ${REPEAT_UNTIL_MIN} minutos.` },
 ];
 
 export default function AjustesNotificaciones() {
@@ -53,7 +53,7 @@ export default function AjustesNotificaciones() {
     refresh();
   }
 
-  const warning = status ? alarmWarning(status) : null;
+  const warning = status ? alarmWarning(status, level) : null;
   return (
     <SafeAreaView style={s.screen}>
       <ScrollView contentContainerStyle={s.pad}>
@@ -63,6 +63,9 @@ export default function AjustesNotificaciones() {
         <Text style={s.body}>{status === null ? "Revisando…" : warning ?? "Todo en orden: los recordatorios van a sonar a la hora indicada."}</Text>
         {status && !status.notifications ? <Button title="Activar notificaciones" onPress={() => void enable()} /> : null}
         {status && status.notifications && status.exactAlarms === false ? <Button title="Permitir alarmas exactas" onPress={() => void requestExactAlarms().then(refresh)} /> : null}
+        {status && status.notifications && status.exactAlarms !== false && level === "fuerte" && status.fullScreen === false ? (
+          <Button title="Permitir pantalla completa" onPress={() => void openFullScreenSettings().then(refresh)} />
+        ) : null}
 
         <SectionTitle>Tipo de alarma</SectionTitle>
         {LEVELS.map((l) => {

@@ -1,6 +1,8 @@
 import * as Notifications from "expo-notifications";
+import { Platform } from "react-native";
 import type { Plan } from "@/lib/types";
 import { alarmProfile, capTriggers, DEFAULT_LEVEL, excludeTaken, expandRepeats, MAX_SCHEDULED, type AlarmLevel } from "./repeats";
+import { cancelAllNativeAlarms, scheduleNativeAlarms } from "./native-alarm";
 import { planDoseTriggers, type DoseTrigger } from "./schedule";
 
 export const DOSE_CATEGORY = "dose";
@@ -42,8 +44,23 @@ export async function syncDoseAlarmsIfChanged(plans: Plan[], tz: string, now: Da
   return { changed: true, signature };
 }
 
+/** Fuerte en Android = alarma nativa (sonido en bucle y pantalla completa); lo demás, notificaciones comunes. */
+const isNativeAlarm = (level: AlarmLevel) => level === "fuerte" && Platform.OS === "android";
+
 async function replaceAlarms(triggers: DoseTrigger[], level: AlarmLevel): Promise<number> {
+  // Se borran las de los dos tipos: la persona pudo haber cambiado de nivel.
   await Notifications.cancelAllScheduledNotificationsAsync();
+  await cancelAllNativeAlarms();
+  if (isNativeAlarm(level)) {
+    try {
+      await scheduleNativeAlarms(triggers);
+      return triggers.length;
+    } catch (e) {
+      // Sin la librería nativa (p. ej. Expo Go) igual suena, como notificación común.
+      console.warn("[mediplan] no se pudieron programar las alarmas nativas, se usan notificaciones comunes:", e);
+      await cancelAllNativeAlarms();
+    }
+  }
   // En tandas de 10 en paralelo: programarlas una por una tarda varios segundos.
   for (let i = 0; i < triggers.length; i += 10) {
     await Promise.all(triggers.slice(i, i + 10).map((t) => schedule(t, level)));

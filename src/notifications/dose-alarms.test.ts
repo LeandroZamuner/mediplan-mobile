@@ -1,5 +1,6 @@
 import * as Notifications from "expo-notifications";
 import { cancelDoseAlarms, doseMatches } from "./dose-alarms";
+import { cancelNativeDoseAlarms } from "./native-alarm";
 
 jest.mock("expo-notifications", () => ({
   getAllScheduledNotificationsAsync: jest.fn(),
@@ -10,6 +11,8 @@ jest.mock("expo-notifications", () => ({
 
 const dose = { planId: "p1", medicationId: "m1", scheduledAt: "2026-11-11T08:00:00-03:00" }; // = 11:00Z
 const sched = (id: string, data: Record<string, unknown>) => ({ identifier: id, content: { data } });
+
+jest.mock("./native-alarm", () => ({ cancelNativeDoseAlarms: jest.fn().mockResolvedValue(undefined) }));
 
 describe("doseMatches", () => {
   it("coincide aunque la hora venga en otro formato (con offset o en UTC)", () => {
@@ -48,5 +51,19 @@ describe("cancelDoseAlarms", () => {
   it("si la librería falla, no rompe el registro de la toma", async () => {
     (Notifications.getAllScheduledNotificationsAsync as jest.Mock).mockRejectedValue(new Error("boom"));
     await expect(cancelDoseAlarms(dose)).resolves.toBeUndefined();
+  });
+
+  it("dada una toma con alarma Fuerte nativa, cuando se marca 'Tomé', entonces también se apagan sus alarmas nativas", async () => {
+    (Notifications.getAllScheduledNotificationsAsync as jest.Mock).mockResolvedValue([]);
+    (Notifications.getPresentedNotificationsAsync as jest.Mock).mockResolvedValue([]);
+    await cancelDoseAlarms(dose);
+    expect(cancelNativeDoseAlarms).toHaveBeenCalledWith(dose);
+  });
+
+  it("dada una falla de expo-notifications, cuando se marca 'Tomé', entonces igual se apagan las alarmas nativas", async () => {
+    jest.spyOn(console, "warn").mockImplementation(() => {});
+    (Notifications.getAllScheduledNotificationsAsync as jest.Mock).mockRejectedValue(new Error("boom"));
+    await cancelDoseAlarms(dose);
+    expect(cancelNativeDoseAlarms).toHaveBeenCalledWith(dose);
   });
 });

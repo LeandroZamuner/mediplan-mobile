@@ -1,12 +1,8 @@
 import * as Notifications from "expo-notifications";
+import { doseMatches, type DoseRef } from "./dose-ref";
+import { cancelNativeDoseAlarms } from "./native-alarm";
 
-export type DoseRef = { planId: string; medicationId: string; scheduledAt: string };
-
-/** ¿Esta notificación es de esa toma? Compara por instante (la hora puede venir con otro formato). */
-export function doseMatches(data: Record<string, unknown> | undefined, dose: DoseRef): boolean {
-  if (!data || typeof data.scheduledAt !== "string") return false;
-  return data.planId === dose.planId && data.medicationId === dose.medicationId && new Date(data.scheduledAt).getTime() === new Date(dose.scheduledAt).getTime();
-}
+export { doseMatches, type DoseRef };
 
 /** Al registrar una toma: se cancelan su alarma y sus repeticiones, y se saca de la barra la que esté sonando. */
 export async function cancelDoseAlarms(dose: DoseRef): Promise<void> {
@@ -18,4 +14,6 @@ export async function cancelDoseAlarms(dose: DoseRef): Promise<void> {
   } catch (e) {
     console.warn("[mediplan] no se pudieron cancelar las alarmas de la toma:", e);
   }
+  // Aparte: si una librería falla, las alarmas de la otra igual se cancelan.
+  await cancelNativeDoseAlarms(dose);
 }

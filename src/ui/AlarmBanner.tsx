@@ -4,6 +4,7 @@ import { useCallback, useEffect, useState } from "react";
 import { AppState, Pressable, StyleSheet, View } from "react-native";
 import { Text } from "@/ui/Text";
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import { loadAlarmLevel } from "@/notifications/alarm-level";
 import { isSnoozed } from "@/notifications/banner-snooze";
 import { alarmWarning, readAlarmStatus } from "@/notifications/permissions";
 import { radius } from "@/theme/tokens";
@@ -14,7 +15,7 @@ const SNOOZE_KEY = "mediplan.alarm-banner-dismissed";
 export function AlarmBanner() {
   const [msg, setMsg] = useState<string | null>(null);
   const check = useCallback(() => {
-    void Promise.all([readAlarmStatus(), AsyncStorage.getItem(SNOOZE_KEY).catch(() => null)]).then(([s, dismissed]) => setMsg(isSnoozed(dismissed, Date.now()) ? null : alarmWarning(s)));
+    void Promise.all([readAlarmStatus(), AsyncStorage.getItem(SNOOZE_KEY).catch(() => null), loadAlarmLevel()]).then(([s, dismissed, level]) => setMsg(isSnoozed(dismissed, Date.now()) ? null : alarmWarning(s, level)));
   }, []);
   useEffect(() => {
     check();

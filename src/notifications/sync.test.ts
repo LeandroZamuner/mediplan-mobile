@@ -1,4 +1,6 @@
+import notifee from "react-native-notify-kit";
 import * as Notifications from "expo-notifications";
+import { Platform } from "react-native";
 import { syncDoseAlarms, syncDoseAlarmsIfChanged } from "./sync";
 import type { Plan } from "@/lib/types";
 
@@ -52,7 +54,7 @@ describe("syncDoseAlarms", () => {
     expect(calls[1].content.body).toMatch(/todavía no registraste/i);
   });
 
-  it("en nivel Fuerte usa el canal de alarma y la notificación no se descarta deslizando", async () => {
+  it("en nivel Fuerte, donde no hay alarma nativa (iPhone), usa el canal de alarma y la notificación no se descarta deslizando", async () => {
     await syncDoseAlarms(plans, "America/Argentina/Buenos_Aires", new Date("2026-11-10T13:00:00Z"), {}, "fuerte");
     const first = (Notifications.scheduleNotificationAsync as jest.Mock).mock.calls[0][0];
     expect(first.trigger.channelId).toBe("doses_strong_v2");
@@ -100,5 +102,42 @@ describe("syncDoseAlarmsIfChanged", () => {
     const first = await syncDoseAlarmsIfChanged(plans, tz, now, { previousSignature: null });
     const changed = await syncDoseAlarmsIfChanged(plans, tz, now, { offsets: { m1: 15 }, previousSignature: first.signature });
     expect(changed.changed).toBe(true);
+  });
+});
+
+describe("syncDoseAlarms en Android", () => {
+  const tz = "America/Argentina/Buenos_Aires";
+  const now = new Date("2026-11-10T13:00:00Z");
+  beforeEach(() => {
+    jest.clearAllMocks();
+    jest.replaceProperty(Platform, "OS", "android");
+  });
+  afterEach(() => jest.restoreAllMocks());
+
+  it("dado el nivel Fuerte, cuando se sincroniza, entonces las alarmas son nativas (7: la original y 6 repeticiones) y no notificaciones comunes", async () => {
+    const n = await syncDoseAlarms(plans, tz, now, {}, "fuerte");
+    expect(n).toBe(7);
+    expect(notifee.createTriggerNotification).toHaveBeenCalledTimes(7);
+    expect(Notifications.scheduleNotificationAsync).not.toHaveBeenCalled();
+  });
+
+  it("dado el nivel Normal, cuando se sincroniza, entonces siguen siendo notificaciones comunes", async () => {
+    await syncDoseAlarms(plans, tz, now, {}, "normal");
+    expect(Notifications.scheduleNotificationAsync).toHaveBeenCalledTimes(7);
+    expect(notifee.createTriggerNotification).not.toHaveBeenCalled();
+  });
+
+  it("dado un cambio de nivel, cuando se sincroniza, entonces se borran las alarmas de los dos tipos antes de programar las nuevas", async () => {
+    await syncDoseAlarms(plans, tz, now, {}, "normal");
+    expect(Notifications.cancelAllScheduledNotificationsAsync).toHaveBeenCalledTimes(1);
+    expect(notifee.cancelTriggerNotifications).toHaveBeenCalledWith();
+  });
+
+  it("dada una falla de la librería nativa, cuando se sincroniza en nivel Fuerte, entonces igual quedan programadas como notificaciones comunes", async () => {
+    jest.spyOn(console, "warn").mockImplementation(() => {});
+    (notifee.createTriggerNotification as jest.Mock).mockRejectedValueOnce(new Error("módulo nativo no disponible"));
+    const n = await syncDoseAlarms(plans, tz, now, {}, "fuerte");
+    expect(n).toBe(7);
+    expect(Notifications.scheduleNotificationAsync).toHaveBeenCalledTimes(7);
   });
 });
