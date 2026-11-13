@@ -60,9 +60,9 @@ describe("tomas ya registradas", () => {
 
 describe("alarmProfile (niveles)", () => {
   it("Normal: canal estándar, se puede descartar y repite", () => {
-    expect(alarmProfile("normal")).toEqual({ channelId: "doses", sticky: false, autoDismiss: true, repeats: true });
+    expect(alarmProfile("normal")).toEqual({ channelId: "doses_v2", sticky: false, autoDismiss: true, repeats: true });
   });
   it("Fuerte: canal de alarma, no se descarta con un deslizamiento y repite", () => {
-    expect(alarmProfile("fuerte")).toEqual({ channelId: "doses_strong", sticky: true, autoDismiss: false, repeats: true });
+    expect(alarmProfile("fuerte")).toEqual({ channelId: "doses_strong_v2", sticky: true, autoDismiss: false, repeats: true });
   });
 });

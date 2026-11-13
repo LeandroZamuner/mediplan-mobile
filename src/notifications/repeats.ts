@@ -1,3 +1,4 @@
+import { CHANNEL_NORMAL, CHANNEL_STRONG } from "./channels";
 import type { DoseTrigger } from "./schedule";
 
 export const REPEAT_EVERY_MIN = 5;
@@ -11,8 +12,8 @@ export const DEFAULT_LEVEL: AlarmLevel = "normal";
 /** Cómo suena cada nivel: Normal = notificación común; Fuerte = alarma (volumen de alarma, no se descarta deslizando). */
 export function alarmProfile(level: AlarmLevel) {
   return level === "fuerte"
-    ? { channelId: "doses_strong", sticky: true, autoDismiss: false, repeats: true }
-    : { channelId: "doses", sticky: false, autoDismiss: true, repeats: true };
+    ? { channelId: CHANNEL_STRONG, sticky: true, autoDismiss: false, repeats: true }
+    : { channelId: CHANNEL_NORMAL, sticky: false, autoDismiss: true, repeats: true };
 }
 
 /** Alarma original + una repetición cada 5 min hasta 30 min después, mientras no se registre la toma. Solo lo que aún no pasó. */

@@ -4,8 +4,6 @@ import { alarmProfile, capTriggers, DEFAULT_LEVEL, excludeTaken, expandRepeats, 
 import { planDoseTriggers, type DoseTrigger } from "./schedule";
 
 export const DOSE_CATEGORY = "dose";
-export const DOSE_CHANNEL = "doses";
-export const DOSE_CHANNEL_STRONG = "doses_strong";
 export const ACTION_TAKEN = "taken";
 
 /** Cuántos días hacia adelante se programan las alarmas locales (se re-sincronizan al abrir la app y con `plan_sync`). */

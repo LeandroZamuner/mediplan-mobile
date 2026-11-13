@@ -34,7 +34,11 @@
       [
         "expo-notifications",
         {
-          "color": "#3646AB"
+          "color": "#3646AB",
+          "sounds": [
+            "./assets/sounds/alarma_fuerte.wav",
+            "./assets/sounds/recordatorio.wav"
+          ]
         }
       ],
       [
