@@ -1,7 +1,7 @@
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { onAuthStateChanged, signOut as fbSignOut, type User } from "firebase/auth";
 import { useSWRConfig } from "swr";
-import { createContext, useCallback, useContext, useEffect, useMemo, useState, type ReactNode } from "react";
+import { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState, type ReactNode } from "react";
 import { ApiError, api } from "@/lib/api";
 import { firebaseAuth } from "@/lib/firebase";
 import type { CaregiverLink, Me, Plan } from "@/lib/types";
@@ -44,6 +44,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [me, setMe] = useState<Me | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [onboarded, setOnboarded] = useState<boolean | null>(null);
+  const latestLoad = useRef(0);
 
   const completeOnboarding = useCallback(async () => {
     setOnboarded(true);
@@ -52,6 +53,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, []);
 
   const load = useCallback(async (user: User | null) => {
+    // Cargar la sesión tarda (varias llamadas a la API): si mientras tanto cambió la sesión (por ejemplo, la persona salió de la cuenta),
+    // el resultado de la carga vieja se descarta para que no pise al nuevo estado.
+    const mine = ++latestLoad.current;
+    const stale = () => mine !== latestLoad.current;
     setFirebaseUser(user);
     if (!user) {
       void clearPersisted();
@@ -63,12 +68,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
     try {
       if (!user.emailVerified) await user.reload();
+      if (stale()) return;
       if (!user.emailVerified) {
         setMe(null);
         setStatus("needsVerification");
         return;
       }
       await user.getIdToken(true);
+      if (stale()) return;
       let profile: Me;
       try {
         profile = await api<Me>("/me");
@@ -83,6 +90,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         api<Plan[]>("/plans/supervised").catch(() => [] as Plan[]),
         api<CaregiverLink[]>("/invitations").catch(() => [] as CaregiverLink[]),
       ]);
+      if (stale()) return;
       // Lo que ya pedimos acá se comparte con las pantallas (no se vuelve a pedir al abrirlas).
       void swrMutate("/plans", plans, { revalidate: false });
       void swrMutate("/plans/supervised", supervised, { revalidate: false });
@@ -92,6 +100,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       setError(null);
       setStatus("ready");
     } catch (e) {
+      if (stale()) return;
       setError(e instanceof Error ? e.message : "No pudimos conectar con MediPlan");
       setStatus("error");
     }

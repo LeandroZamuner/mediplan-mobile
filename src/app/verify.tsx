@@ -1,7 +1,7 @@
 import { Feather } from "@expo/vector-icons";
 import { sendEmailVerification } from "firebase/auth";
-import { useState } from "react";
-import { StyleSheet, View } from "react-native";
+import { useEffect, useState } from "react";
+import { AppState, StyleSheet, View } from "react-native";
 import { useAuth } from "@/auth/AuthProvider";
 import { Button } from "@/ui/Button";
 import { GradientScreen } from "@/ui/GradientScreen";
@@ -13,6 +13,20 @@ export default function Verify() {
   const [msg, setMsg] = useState("");
   const [checking, setChecking] = useState(false);
 
+  // Al volver a la app después de tocar el enlace del correo, se comprueba sola (si ya está verificado, la pantalla se cierra).
+  useEffect(() => {
+    const sub = AppState.addEventListener("change", (state) => state === "active" && void recheck());
+    return () => sub.remove();
+  }, [recheck]);
+
+  async function check() {
+    setChecking(true);
+    setMsg("");
+    await recheck();
+    setChecking(false);
+    setMsg("Todavía no vemos tu correo verificado. Abrí el enlace del mensaje y volvé a probar."); // si ya estaba verificado, esta pantalla ya no está
+  }
+
   return (
     <GradientScreen>
       <View style={s.center}>
@@ -22,7 +36,7 @@ export default function Verify() {
       <Text style={s.body}>Te enviamos un mensaje a {firebaseUser?.email} para confirmar que es tuyo. Abrí el enlace y volvé acá.</Text>
       {msg ? <Text style={s.msg}>{msg}</Text> : null}
       <View style={s.actions}>
-        <Button title="Ya lo verifiqué" loading={checking} onPress={() => { setChecking(true); void recheck().finally(() => setChecking(false)); }} />
+        <Button title="Ya lo verifiqué" loading={checking} onPress={() => void check()} />
         <Button
           title="Reenviar correo"
           variant="soft"
