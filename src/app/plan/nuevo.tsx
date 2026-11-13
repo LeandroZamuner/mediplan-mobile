@@ -52,7 +52,10 @@ export default function NewPlan() {
     try {
       let created: Plan["medications"] = [];
       if (planId) {
-        for (const m of drafts) created.push(await api<Plan["medications"][number]>(`/plans/${planId}/medications`, { method: "POST", json: toCreateBody(m) }));
+        // Agregar un medicamento devuelve el plan completo (no el medicamento): los nuevos son los últimos, en el orden en que se enviaron.
+        let updated: Plan | undefined;
+        for (const m of drafts) updated = await api<Plan>(`/plans/${planId}/medications`, { method: "POST", json: toCreateBody(m) });
+        created = updated ? updated.medications.slice(-drafts.length) : [];
       } else {
         const plan = await api<Plan>("/plans", { method: "POST", json: { name: "Mi plan", medications: drafts.map(toCreateBody) } });
         created = plan.medications;
