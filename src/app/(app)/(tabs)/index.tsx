@@ -58,12 +58,15 @@ export default function Home() {
     if (!asking) return;
     const d = asking;
     setAsking(null);
+    const isThis = (x: TodayDose) => x.scheduledAt === d.scheduledAt && x.medicationId === d.medicationId;
+    const before = doses.data;
+    // Se marca como tomada al instante: la API (sobre todo si está despertando) puede tardar varios segundos y parecía que no pasaba nada.
+    await doses.mutate((cur) => cur?.map((x) => (isThis(x) ? { ...x, status: "taken" as const } : x)), { revalidate: false });
     try {
       const result = await recordTaken(d.planId, d.medicationId, d.scheduledAt);
       void Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
       if (result === "queued") {
-        // Sin internet: la mostramos como tomada y se envía sola cuando vuelva la conexión.
-        await doses.mutate((cur) => cur?.map((x) => (x.scheduledAt === d.scheduledAt && x.medicationId === d.medicationId ? { ...x, status: "taken" as const } : x)), { revalidate: false });
+        // Sin internet: queda como tomada y se envía sola cuando vuelva la conexión.
         setToast("Sin conexión: guardamos tu toma y la enviamos cuando vuelva internet.");
         setTimeout(() => setToast(""), 5000);
         return;
@@ -74,6 +77,7 @@ export default function Home() {
         setTimeout(() => setToast(""), 4000);
       }
     } catch (e) {
+      await doses.mutate(before, { revalidate: false }); // no se pudo registrar: vuelve a figurar pendiente
       setToast(e instanceof Error ? e.message : "No pudimos registrar la toma.");
       setTimeout(() => setToast(""), 4000);
     }
