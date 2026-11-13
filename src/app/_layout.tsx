@@ -4,6 +4,7 @@ import * as SplashScreen from "expo-splash-screen";
 import { StatusBar } from "expo-status-bar";
 import { AuthProvider, useAuth } from "@/auth/AuthProvider";
 import { SwrProvider } from "@/lib/SwrProvider";
+import { ConnectingScreen, useSlowAfter } from "@/ui/ConnectingScreen";
 import { GradientScreen } from "@/ui/GradientScreen";
 import { Button } from "@/ui/Button";
 import { useEffect } from "react";
@@ -37,12 +38,13 @@ function Routes() {
   // Alarma Fuerte: pantalla completa y botones con la app abierta (con la app cerrada los atiende background.ts).
   useAlarmEvents(status === "ready" && !!onboarded);
   const ready = status !== "loading" && !(status === "ready" && onboarded === null);
+  // Si abrir la sesión tarda (servidor dormido), se saca la pantalla de arranque y se explica qué pasa.
+  const slow = useSlowAfter(!ready, 4000);
   useEffect(() => {
-    if (ready) SplashScreen.hide();
-  }, [ready]);
+    if (ready || slow) SplashScreen.hide();
+  }, [ready, slow]);
 
-
-  if (!ready) return null; // sigue visible la pantalla de arranque
+  if (!ready) return slow ? <ConnectingScreen /> : null; // antes de 4 s sigue visible la pantalla de arranque
   if (status === "error")
     return (
       <GradientScreen style={{ justifyContent: "center", gap: 12 }}>

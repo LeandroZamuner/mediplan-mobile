@@ -1,4 +1,4 @@
-import { api } from "./api";
+import { api, API_TIMEOUT_MS } from "./api";
 import { firebaseAuth } from "@/lib/firebase";
 
 jest.mock("@/lib/firebase", () => ({ firebaseAuth: jest.fn() }));
@@ -30,5 +30,19 @@ describe("api", () => {
     (firebaseAuth as jest.Mock).mockReturnValue({ authStateReady: async () => {}, currentUser: null });
     await api("/me");
     expect((fetchMock.mock.calls[0][1].headers as Headers).has("Authorization")).toBe(false);
+  });
+});
+
+describe("api con el servidor que no contesta", () => {
+  it("dado un servidor que nunca responde, cuando pasa el tiempo máximo, entonces corta y falla como error de conexión (para que las tomas queden en cola y salga 'Reintentar')", async () => {
+    jest.useFakeTimers();
+    (firebaseAuth as jest.Mock).mockReturnValue({ authStateReady: async () => {}, currentUser: null });
+    fetchMock.mockImplementation((_url: string, init: { signal: AbortSignal }) => new Promise((_, reject) => init.signal.addEventListener("abort", () => reject(new DOMException("aborted", "AbortError")))));
+    const result = api("/me").catch((e) => e);
+    await jest.advanceTimersByTimeAsync(API_TIMEOUT_MS + 100);
+    const err = await result;
+    expect(err).toBeInstanceOf(TypeError);
+    expect((err as Error).message).toMatch(/tardó demasiado/);
+    jest.useRealTimers();
   });
 });

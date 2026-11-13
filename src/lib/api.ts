@@ -13,6 +13,9 @@ export class ApiError extends Error {
 
 type Options = Omit<RequestInit, "body"> & { json?: unknown };
 
+/** Cuánto se espera una respuesta. Un servidor gratuito dormido tarda cerca de un minuto en despertar: hay que darle margen, pero no esperar para siempre. */
+export const API_TIMEOUT_MS = 75_000;
+
 /** Llama a la API de MediPlan con el token de la sesión de Firebase. Las rutas empiezan con "/" (sin /api/v1). */
 export async function api<T>(path: string, { json, ...init }: Options = {}): Promise<T> {
   const headers = new Headers(init.headers);
@@ -26,9 +29,19 @@ export async function api<T>(path: string, { json, ...init }: Options = {}): Pro
     headers.set("Content-Type", "application/json");
     body = JSON.stringify(json);
   }
-  const res = await fetch(`${API_URL}/api/v1${path}`, { ...init, headers, body });
-  if (res.status === 204) return undefined as T;
-  const data = await res.json().catch(() => null);
-  if (!res.ok) throw new ApiError(res.status, data?.error ?? "Ocurrió un error inesperado");
-  return data as T;
+  const controller = new AbortController();
+  const timer = setTimeout(() => controller.abort(), API_TIMEOUT_MS);
+  try {
+    const res = await fetch(`${API_URL}/api/v1${path}`, { ...init, headers, body, signal: controller.signal });
+    if (res.status === 204) return undefined as T;
+    const data = await res.json().catch(() => null);
+    if (!res.ok) throw new ApiError(res.status, data?.error ?? "Ocurrió un error inesperado");
+    return data as T;
+  } catch (e) {
+    // Como una falla de red (TypeError): las tomas quedan en cola y la pantalla de arranque ofrece "Reintentar".
+    if (controller.signal.aborted) throw new TypeError("La conexión tardó demasiado. Revisá tu internet e intentá de nuevo.");
+    throw e;
+  } finally {
+    clearTimeout(timer);
+  }
 }
