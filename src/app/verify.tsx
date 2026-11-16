@@ -1,8 +1,9 @@
 import { Feather } from "@expo/vector-icons";
-import { sendEmailVerification } from "firebase/auth";
 import { useEffect, useState } from "react";
 import { AppState, StyleSheet, View } from "react-native";
 import { useAuth } from "@/auth/AuthProvider";
+import { authErrorMessage } from "@/lib/auth-errors";
+import { requestVerification } from "@/lib/account-mail";
 import { Button } from "@/ui/Button";
 import { GradientScreen } from "@/ui/GradientScreen";
 import { Text } from "@/ui/Text";
@@ -42,10 +43,15 @@ export default function Verify() {
           variant="soft"
           onPress={async () => {
             try {
-              if (firebaseUser) await sendEmailVerification(firebaseUser);
-              setMsg("Listo, lo reenviamos.");
-            } catch {
-              setMsg("Esperá unos minutos antes de pedirlo otra vez.");
+              if (!firebaseUser) return;
+              if (await requestVerification(firebaseUser)) setMsg("Listo, lo reenviamos.");
+              else {
+                // Ya estaba verificado (por ejemplo desde otro dispositivo): se vuelve a comprobar y esta pantalla se cierra sola.
+                await recheck();
+                setMsg("Tu correo ya figura como verificado.");
+              }
+            } catch (e) {
+              setMsg(authErrorMessage(e));
             }
           }}
         />

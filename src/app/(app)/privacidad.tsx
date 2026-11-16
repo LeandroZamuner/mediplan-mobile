@@ -1,12 +1,11 @@
 import { router } from "expo-router";
-import { sendPasswordResetEmail } from "firebase/auth";
 import { useState } from "react";
 import { Modal, ScrollView, StyleSheet, View } from "react-native";
 import { Text } from "@/ui/Text";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useAuth } from "@/auth/AuthProvider";
 import { authErrorMessage } from "@/lib/auth-errors";
-import { firebaseAuth } from "@/lib/firebase";
+import { requestPasswordReset } from "@/lib/account-mail";
 import { deleteAccount } from "@/lib/delete-account";
 import { colors } from "@/theme/tokens";
 import { ScreenHeader } from "@/ui/ScreenHeader";
@@ -28,7 +27,7 @@ export default function Privacidad() {
     if (!me) return;
     setBusy(true);
     try {
-      await sendPasswordResetEmail(firebaseAuth(), me.email);
+      await requestPasswordReset(me.email);
       setMsg(`Te enviamos un correo a ${me.email} para elegir una contraseña nueva.`);
     } catch (e) {
       setMsg(authErrorMessage(e));

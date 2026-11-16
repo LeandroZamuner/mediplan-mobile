@@ -1,5 +1,9 @@
 /** Traduce los códigos de error de Firebase Auth a mensajes claros. */
 export function authErrorMessage(error: unknown): string {
+  // Errores de la API de MediPlan al pedir un correo de cuenta (no son de Firebase): llegan con "status".
+  const status = typeof error === "object" && error && "status" in error ? (error as { status: unknown }).status : undefined;
+  if (status === 429) return "Pediste el correo hace muy poco. Esperá un minuto y probá de nuevo.";
+  if (status === 422) return "Revisá el correo: no parece válido.";
   const code = typeof error === "object" && error && "code" in error ? String((error as { code: unknown }).code) : "";
   switch (code) {
     case "auth/invalid-credential":

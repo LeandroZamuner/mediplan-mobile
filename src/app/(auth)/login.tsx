@@ -39,6 +39,7 @@ export default function Login() {
         <Field onDark placeholder="Contraseña" secureTextEntry value={password} onChangeText={setPassword} />
         {error ? <Text style={s.error}>{error}</Text> : null}
         <Button title="Ingresar" onDark disabled={!ready} loading={busy} onPress={submit} />
+        <Button title="¿Olvidaste tu contraseña?" variant="ghost" onDark onPress={() => router.push("/recuperar")} />
         <Button title="Crear cuenta" variant="ghost" onDark onPress={() => router.replace("/register")} />
       </View>
     </GradientScreen>
