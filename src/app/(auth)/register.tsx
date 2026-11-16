@@ -1,11 +1,12 @@
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { Feather } from "@expo/vector-icons";
 import { router } from "expo-router";
-import { createUserWithEmailAndPassword, sendEmailVerification, updateProfile } from "firebase/auth";
+import { createUserWithEmailAndPassword, updateProfile } from "firebase/auth";
 import { useState } from "react";
 import { Pressable, StyleSheet, View } from "react-native";
 import { Text } from "@/ui/Text";
 import { ROLE_KEY } from "@/auth/AuthProvider";
+import { requestVerification } from "@/lib/account-mail";
 import { authErrorMessage } from "@/lib/auth-errors";
 import { firebaseAuth } from "@/lib/firebase";
 import { passwordChecks, isPasswordValid } from "@/lib/password";
@@ -33,8 +34,9 @@ export default function Register() {
       await AsyncStorage.setItem(ROLE_KEY, role).catch(() => {});
       const cred = await createUserWithEmailAndPassword(firebaseAuth(), email.trim(), password);
       await updateProfile(cred.user, { displayName: name.trim() }).catch(() => {}); // el nombre es opcional: si falla, igual se crea la cuenta
-      await sendEmailVerification(cred.user);
-      // El resto lo resuelve AuthProvider: pasa a "verificá tu correo".
+      // No se espera: la API gratuita puede tardar en despertar y mientras tanto AuthProvider ya pasa a "verificá tu correo".
+      // Si el envío falla, desde esa pantalla se puede reenviar.
+      void requestVerification(cred.user).catch(() => undefined);
     } catch (e) {
       setError(authErrorMessage(e));
       setBusy(false);
