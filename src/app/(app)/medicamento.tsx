@@ -15,6 +15,7 @@ import { Button } from "@/ui/Button";
 import { ConfirmModal } from "@/ui/ConfirmModal";
 import { Field } from "@/ui/Field";
 import { Labeled } from "@/ui/Labeled";
+import { ErrorText } from "@/ui/ErrorText";
 
 /** Detalles de la medicación: datos, stock, frecuencia, ajustar (dosis, fin, reponer) y eliminar del plan. */
 export default function MedicationDetail() {
@@ -84,7 +85,7 @@ export default function MedicationDetail() {
             <Labeled label="Dosis"><Field value={dose} onChangeText={setDose} /></Labeled>
             <Labeled label="Hasta (DD/MM/AAAA)" hint="Dejalo vacío si no tiene fecha de fin."><Field value={end} onChangeText={setEnd} placeholder="Ej: 28/6/2026" keyboardType="numbers-and-punctuation" /></Labeled>
             <Labeled label="Reponer comprimidos" hint={`Hoy tenés ${med.stockUnits}. Lo que escribas se suma.`}><Field value={refill} onChangeText={setRefill} placeholder="Ej: 30" keyboardType="number-pad" /></Labeled>
-            {error ? <Text style={s.err}>{error}</Text> : null}
+            {error ? <ErrorText message={error} style={s.err} /> : null}
             <Button title="Guardar cambios" loading={busy} onPress={() => void save()} />
             <Button title="Cancelar" variant="ghost" onPress={() => setEditing(false)} />
           </>
@@ -103,7 +104,7 @@ export default function MedicationDetail() {
               <Text style={s.body}>Desde: {formatDate(med.startDate)}</Text>
               <Text style={s.body}>{med.endDate ? `Finaliza: ${formatDate(med.endDate)}` : "Sin fecha de fin"}</Text>
             </View>
-            {error ? <Text style={s.err}>{error}</Text> : null}
+            {error ? <ErrorText message={error} style={s.err} /> : null}
             <Button title="Ajustar medicación" variant="soft" onPress={startEdit} />
             <Button title="Eliminar del plan" variant="ghost" onPress={() => setDeleting(true)} />
           </>

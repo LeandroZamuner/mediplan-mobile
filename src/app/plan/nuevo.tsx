@@ -19,6 +19,7 @@ import { Field } from "@/ui/Field";
 import { Labeled } from "@/ui/Labeled";
 import { Select } from "@/ui/Select";
 import { WizardShell } from "@/ui/WizardShell";
+import { ErrorText } from "@/ui/ErrorText";
 
 const REMINDERS = [
   { label: "Sin recordatorio previo", value: 0 },
@@ -134,7 +135,7 @@ export default function NewPlan() {
             <Feather name="plus" size={18} color={colors.primary} />
             <Text style={s.addText}>Agregar medicamento</Text>
           </Pressable>
-          {error ? <Text style={s.err}>{error}</Text> : null}
+          {error ? <ErrorText message={error} style={s.err} /> : null}
         </WizardShell>
       )}
 
