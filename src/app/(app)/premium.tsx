@@ -1,11 +1,11 @@
 import { useEffect, useState } from "react";
-import { AppState, Linking, ScrollView, StyleSheet, View } from "react-native";
+import { AppState, Linking, ScrollView, StyleSheet, Switch, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import useSWR from "swr";
 import { useAuth } from "@/auth/AuthProvider";
 import { api } from "@/lib/api";
 import { longDate, premiumView, priceLabel } from "@/lib/premium";
-import type { Subscription } from "@/lib/types";
+import type { Preferences, Subscription } from "@/lib/types";
 import { colors, radius } from "@/theme/tokens";
 import { Button } from "@/ui/Button";
 import { ConfirmModal } from "@/ui/ConfirmModal";
@@ -25,6 +25,7 @@ const PREMIUM = [
 export default function Premium() {
   const { me } = useAuth();
   const { data: sub, error, mutate } = useSWR<Subscription>("/me/subscription", (p: string) => api<Subscription>(p));
+  const { data: prefs, mutate: mutatePrefs } = useSWR<Preferences>("/me/preferences", (p: string) => api<Preferences>(p));
   const [busy, setBusy] = useState<"pay" | "sync" | "cancel" | null>(null);
   const [msg, setMsg] = useState<{ ok: boolean; text: string } | null>(null);
   const [payerEmail, setPayerEmail] = useState(me?.email ?? "");
@@ -37,6 +38,17 @@ export default function Premium() {
     const l = AppState.addEventListener("change", (st) => { if (st === "active") void check(); });
     return () => l.remove();
   }, [mutate]);
+
+  async function setPref(patch: Partial<Pick<Preferences, "weeklyReport" | "aiConsent">>) {
+    if (!prefs) return;
+    setMsg(null);
+    try {
+      const next = await api<Preferences>("/me/preferences", { method: "PUT", json: { weeklyReport: prefs.weeklyReport, aiConsent: prefs.aiConsent, ...patch } });
+      await mutatePrefs(next, { revalidate: false });
+    } catch (e) {
+      setMsg({ ok: false, text: e instanceof Error ? e.message : "No pudimos guardar tu elección." });
+    }
+  }
 
   async function pay() {
     setBusy("pay");
@@ -115,6 +127,22 @@ export default function Premium() {
 
             {view === "unavailable" && <Text style={s.body}>Los pagos todavía no están habilitados. Mientras tanto podés usar MediPlan con el plan gratis.</Text>}
 
+            {(view === "premium" || view === "premium-ending") && prefs ? (
+              <View style={s.card}>
+                <Text style={s.h2}>Resumen semanal e inteligencia artificial</Text>
+                <View style={s.switchRow}>
+                  <Text style={[s.body, { flex: 1 }]}>
+                    Acepto usar inteligencia artificial. Un modelo de Google (Gemini) redacta el resumen semanal y responde en el asistente. Para el resumen solo recibe números anónimos (sin tu nombre, correo ni medicamentos). En el asistente recibe tus preguntas y los datos de tu tratamiento que consulta. No guardamos tus conversaciones.
+                  </Text>
+                  <Switch value={prefs.aiConsent} onValueChange={(v) => void setPref({ aiConsent: v })} accessibilityLabel="Aceptar el uso de inteligencia artificial" />
+                </View>
+                <View style={s.switchRow}>
+                  <Text style={[s.body, { flex: 1 }]}>Quiero recibir el resumen semanal por correo (los lunes a la mañana). Sin la IA, llega igual con un texto fijo.</Text>
+                  <Switch value={prefs.weeklyReport} onValueChange={(v) => void setPref({ weeklyReport: v })} accessibilityLabel="Recibir el resumen semanal por correo" />
+                </View>
+              </View>
+            ) : null}
+
             <View style={s.card}>
               <Text style={s.h2}>Gratis</Text>
               {FREE.map((f) => <Text key={f} style={s.body}>• {f}</Text>)}
@@ -164,5 +192,6 @@ const s = StyleSheet.create({
   ok: { fontSize: 13, color: colors.success },
   card: { backgroundColor: colors.surface, borderRadius: radius.lg, padding: 16, gap: 8 },
   cardPremium: { backgroundColor: colors.primarySoft },
+  switchRow: { flexDirection: "row", alignItems: "flex-start", gap: 12 },
   highlight: { backgroundColor: colors.primarySoft, borderRadius: radius.lg, padding: 16, gap: 10 },
 });
