@@ -14,6 +14,7 @@ import { ConfirmModal } from "@/ui/ConfirmModal";
 import { Field } from "@/ui/Field";
 import { Labeled } from "@/ui/Labeled";
 import { WizardShell } from "@/ui/WizardShell";
+import { ErrorText } from "@/ui/ErrorText";
 
 const validEmail = (e: string) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(e.trim());
 
@@ -68,7 +69,7 @@ export default function NewCaregivers() {
             <Button title="Compartir enlace" variant="soft" onPress={() => void Share.share({ message: `Te invité a supervisar mi tratamiento en MediPlan: ${invitationUrl(l.token ?? "")}` })} />
           </View>
         ))}
-        {error ? <Text style={s.err}>{error}</Text> : null}
+        {error ? <ErrorText message={error} style={s.err} /> : null}
       </WizardShell>
     );
 
@@ -100,7 +101,7 @@ export default function NewCaregivers() {
           ))}
           <Text style={s.label}>Enviaremos una invitación a estas personas al finalizar.</Text>
           <Button title="Agregar otra persona" variant="soft" onPress={() => setStep(1)} />
-          {error ? <Text style={s.err}>{error}</Text> : null}
+          {error ? <ErrorText message={error} style={s.err} /> : null}
         </WizardShell>
       )}
       <ConfirmModal visible={leaving} title="¿No quiere agregar cuidadores ahora?" message="No se preocupe, puede agregar cuidadores en cualquier momento desde su perfil." confirmLabel="No, salir" onCancel={() => setLeaving(false)} onConfirm={() => { setLeaving(false); router.back(); }} />
