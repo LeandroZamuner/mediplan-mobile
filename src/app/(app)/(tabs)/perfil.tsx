@@ -11,8 +11,9 @@ import { SectionTitle } from "@/ui/SectionTitle";
 import { TabScreen } from "@/ui/TabScreen";
 import { Text } from "@/ui/Text";
 
-type Href = "/premium" | "/cuidados" | "/cuenta" | "/privacidad" | "/idioma" | "/ajustes-notificaciones" | "/politica-privacidad" | "/aviso-medico";
+type Href = "/asistente" | "/premium" | "/cuidados" | "/cuenta" | "/privacidad" | "/idioma" | "/ajustes-notificaciones" | "/politica-privacidad" | "/aviso-medico";
 const SETTINGS: { label: string; href: Href }[] = [
+  { label: "Asistente con IA", href: "/asistente" },
   { label: "Premium", href: "/premium" },
   { label: "Información de mi cuenta", href: "/cuenta" },
   { label: "Privacidad y seguridad", href: "/privacidad" },

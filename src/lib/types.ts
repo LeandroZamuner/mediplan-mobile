@@ -68,3 +68,8 @@ export type Subscription = {
   usage: { activePlans: number; medications: number };
   payments: { enabled: boolean; priceArs?: number; currency?: string; period?: string };
 };
+
+/** Preferencias de correos e IA (GET/PUT /me/preferences). Todo arranca apagado. */
+export type Preferences = { weeklyReport: boolean; aiConsent: boolean; assistantAvailable: boolean };
+
+export type ChatMessage = { role: "user" | "assistant"; text: string };
